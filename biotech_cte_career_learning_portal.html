@@ -1,0 +1,2002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biotech CTE Career & Learning Portal</title>
+  
+  <!-- Google Fonts: Pixelify Sans for headers/HUD & Plus Jakarta Sans for clean readable body text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: '#1e3a29',
+            'forest-dark': '#13261a',
+            sage: '#4a7c59',
+            'sage-light': '#6a9c79',
+            brown: '#5c4033',
+            clay: '#b85d38',
+            parchment: '#f7f4ea',
+            sand: '#eae3d2',
+            moss: '#88a070',
+            slate: '#232b25',
+            gold: '#d4af37'
+          },
+          fontFamily: {
+            pixel: ['"Pixelify Sans"', 'sans-serif'],
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Custom Retro Pixel Aesthetics */
+    body {
+      background-color: #f7f4ea;
+      color: #232b25;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-image: radial-gradient(#eae3d2 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+
+    .pixel-font {
+      font-family: 'Pixelify Sans', sans-serif;
+    }
+
+    /* Retro Pixelated Shadow & Borders */
+    .pixel-box {
+      border: 3px solid #1e3a29;
+      box-shadow: 4px 4px 0px #1e3a29;
+      background-color: #ffffff;
+    }
+
+    .pixel-box-sm {
+      border: 2px solid #1e3a29;
+      box-shadow: 2px 2px 0px #1e3a29;
+    }
+
+    .pixel-btn {
+      border: 2px solid #13261a;
+      box-shadow: 3px 3px 0px #13261a;
+      transition: all 0.08s ease-in-out;
+      user-select: none;
+    }
+
+    .pixel-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 4px 4px 0px #13261a;
+    }
+
+    .pixel-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px #13261a;
+    }
+
+    .hud-tab {
+      border: 2px solid #1e3a29;
+      border-bottom: none;
+      box-shadow: 0px -2px 0px #1e3a29;
+    }
+
+    .hud-tab.active {
+      background-color: #1e3a29;
+      color: #f7f4ea;
+    }
+
+    /* Smooth custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #eae3d2;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #4a7c59;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #1e3a29;
+    }
+
+    /* Confetti Canvas Overlay */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Particle Confetti Overlay Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- TOP HEADER / HUD NAVIGATION BAR -->
+  <header class="bg-forest text-parchment sticky top-0 z-50 border-b-4 border-forest-dark shadow-md">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('map')">
+        <div class="w-10 h-10 bg-clay rounded flex items-center justify-center border-2 border-parchment shadow">
+          <span class="text-2xl">🧪</span>
+        </div>
+        <div>
+          <h1 class="pixel-font text-xl md:text-2xl font-bold tracking-wide text-gold leading-none">
+            BIOTECH CTE ARCHIPELAGO
+          </h1>
+          <p class="text-xs text-sand font-medium">High School Career, College & Game Explorer</p>
+        </div>
+      </div>
+
+      <!-- Controls & Quick Status -->
+      <div class="flex items-center space-x-3 text-xs md:text-sm">
+        <!-- Sound Toggle -->
+        <button id="sound-toggle-btn" onclick="toggleSound()" class="px-3 py-1.5 bg-sage hover:bg-sage-light text-parchment rounded border border-forest-dark font-semibold flex items-center gap-1">
+          <span id="sound-icon">🔊</span> <span id="sound-text">SFX: ON</span>
+        </button>
+        
+        <!-- Badge Progress Quick Counter -->
+        <div onclick="switchTab('badges')" class="cursor-pointer px-3 py-1.5 bg-brown text-gold rounded border border-forest-dark font-pixel flex items-center gap-1.5 hover:opacity-90">
+          <span>🏆</span>
+          <span id="header-badge-count">0/5 BADGES</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN NAVIGATION TABS -->
+    <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto space-x-1 pt-2">
+      <button onclick="switchTab('map')" id="tab-btn-map" class="hud-tab px-4 py-2 font-pixel text-sm font-bold flex items-center gap-2 whitespace-nowrap rounded-t active">
+        <span>🗺️</span> World Map Hub
+      </button>
+      <button onclick="switchTab('branches')" id="tab-btn-branches" class="hud-tab px-4 py-2 font-pixel text-sm font-bold flex items-center gap-2 whitespace-nowrap rounded-t bg-sand text-slate hover:bg-parchment">
+        <span>🧪</span> Biotech Branches
+      </button>
+      <button onclick="switchTab('colleges')" id="tab-btn-colleges" class="hud-tab px-4 py-2 font-pixel text-sm font-bold flex items-center gap-2 whitespace-nowrap rounded-t bg-sand text-slate hover:bg-parchment">
+        <span>🎓</span> Top NJ Colleges
+      </button>
+      <button onclick="switchTab('game')" id="tab-btn-game" class="hud-tab px-4 py-2 font-pixel text-sm font-bold flex items-center gap-2 whitespace-nowrap rounded-t bg-sand text-slate hover:bg-parchment">
+        <span>🎮</span> CTE Game Portal
+      </button>
+      <button onclick="switchTab('badges')" id="tab-btn-badges" class="hud-tab px-4 py-2 font-pixel text-sm font-bold flex items-center gap-2 whitespace-nowrap rounded-t bg-sand text-slate hover:bg-parchment">
+        <span>🏆</span> Achievements
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN TAB CONTENT CONTAINER -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-grow">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: 🗺️ WORLD MAP HUB SECTION           -->
+    <!-- ========================================== -->
+    <section id="tab-content-map" class="space-y-6">
+      
+      <!-- Welcome Intro Card -->
+      <div class="pixel-box p-4 md:p-6 rounded-lg bg-gradient-to-r from-sand to-parchment flex flex-col md:flex-row items-center justify-between gap-4">
+        <div>
+          <span class="px-2.5 py-1 bg-clay text-parchment text-xs font-pixel rounded uppercase font-bold tracking-wider">CTE Student Guidance</span>
+          <h2 class="pixel-font text-2xl md:text-3xl text-forest font-bold mt-1">Explore the 8 Islands of Biotechnology</h2>
+          <p class="text-slate text-sm md:text-base mt-1 max-w-2xl">
+            Welcome, future biotechnologist! Click any island on the interactive map below or hover to preview key high school pathways, interactive mini-labs, and high-paying career roles.
+          </p>
+        </div>
+        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+          <button onclick="switchTab('branches')" class="pixel-btn px-4 py-2 bg-sage text-parchment font-pixel text-sm rounded font-bold text-center">
+            🧪 Browse All 8 Branches
+          </button>
+          <button onclick="switchTab('game')" class="pixel-btn px-4 py-2 bg-clay text-parchment font-pixel text-sm rounded font-bold text-center">
+            🎮 Open CTE Game Frame
+          </button>
+        </div>
+      </div>
+
+      <!-- 2D Canvas Interactive Island Archipelago -->
+      <div class="pixel-box p-3 md:p-4 rounded-lg bg-emerald-950 relative overflow-hidden">
+        
+        <!-- Canvas Map Header HUD -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-sage/40 mb-2 text-parchment">
+          <div class="flex items-center gap-2 font-pixel text-sm text-gold">
+            <span>📍 LOGATION:</span> <span>Biotech Career Archipelago (Sector NJ-CTE)</span>
+          </div>
+          <div class="text-xs text-sand font-mono">
+            Click island to enter • Scroll/Drag supported
+          </div>
+        </div>
+
+        <!-- Canvas Element -->
+        <div class="relative w-full aspect-[16/9] max-h-[550px] bg-[#224452] rounded border border-sage/50 overflow-hidden cursor-crosshair">
+          <canvas id="world-map-canvas" class="w-full h-full block"></canvas>
+          
+          <!-- Hover Info Overlay -->
+          <div id="map-hover-tooltip" class="hidden absolute pointer-events-none pixel-box-sm p-3 bg-parchment text-slate text-xs max-w-xs z-20 rounded shadow-xl">
+            <div id="tooltip-title" class="font-pixel text-base text-forest font-bold mb-0.5">Island Title</div>
+            <div id="tooltip-desc" class="text-slate/80 text-[11px] mb-1 leading-tight">Description goes here</div>
+            <div id="tooltip-status" class="font-pixel text-[10px] text-clay font-bold">STATUS: UNEXPLORED</div>
+          </div>
+        </div>
+
+        <!-- Quick Island Jump Grid -->
+        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
+          <button onclick="selectBranch('microbial')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🦠 Microbial
+          </button>
+          <button onclick="selectBranch('agricultural')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🌱 Agricultural
+          </button>
+          <button onclick="selectBranch('animal')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🐾 Animal
+          </button>
+          <button onclick="selectBranch('forensic')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🧬 Forensic
+          </button>
+          <button onclick="selectBranch('bioremediation')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🌊 Bioremediation
+          </button>
+          <button onclick="selectBranch('aquatic')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🪼 Aquatic
+          </button>
+          <button onclick="selectBranch('medical')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            🩺 Medical
+          </button>
+          <button onclick="selectBranch('regulatory')" class="pixel-btn p-2 bg-sand hover:bg-parchment text-xs font-pixel rounded text-center truncate">
+            ⚖️ Regulatory
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: 🧪 BIOTECH BRANCHES SECTION         -->
+    <!-- ========================================== -->
+    <section id="tab-content-branches" class="hidden space-y-6">
+      
+      <!-- Branch Navigation Pills -->
+      <div class="flex overflow-x-auto space-x-2 pb-2">
+        <button onclick="selectBranch('microbial')" id="bnav-microbial" class="pixel-btn px-3 py-2 bg-forest text-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🦠 Microbial
+        </button>
+        <button onclick="selectBranch('agricultural')" id="bnav-agricultural" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🌱 Agricultural
+        </button>
+        <button onclick="selectBranch('animal')" id="bnav-animal" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🐾 Animal
+        </button>
+        <button onclick="selectBranch('forensic')" id="bnav-forensic" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🧬 Forensic
+        </button>
+        <button onclick="selectBranch('bioremediation')" id="bnav-bioremediation" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🌊 Bioremediation
+        </button>
+        <button onclick="selectBranch('aquatic')" id="bnav-aquatic" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🪼 Aquatic
+        </button>
+        <button onclick="selectBranch('medical')" id="bnav-medical" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          🩺 Medical
+        </button>
+        <button onclick="selectBranch('regulatory')" id="bnav-regulatory" class="pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap">
+          ⚖️ Regulatory
+        </button>
+      </div>
+
+      <!-- Main Branch Detail Display Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- Left Column: Educational Content & Career Info -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="pixel-box p-6 rounded-lg bg-white">
+            <div class="flex items-center justify-between border-b-2 border-sand pb-4 mb-4">
+              <div class="flex items-center space-x-3">
+                <span id="branch-icon" class="text-4xl p-2 bg-sand rounded border border-forest">🦠</span>
+                <div>
+                  <h2 id="branch-title" class="pixel-font text-2xl md:text-3xl font-bold text-forest">Microbial Biotechnology</h2>
+                  <p id="branch-subtitle" class="text-xs font-mono text-clay">Bio-Manufacturing & Fermentation Systems</p>
+                </div>
+              </div>
+              <span id="branch-badge-status" class="px-2.5 py-1 bg-sand text-forest border border-forest text-xs font-pixel rounded">
+                SIM: PENDING
+              </span>
+            </div>
+
+            <!-- Overview Text -->
+            <div class="space-y-4 text-slate text-sm leading-relaxed">
+              <div>
+                <h3 class="font-pixel text-lg text-forest font-bold mb-1">📘 Branch Overview</h3>
+                <p id="branch-overview">Detailed overview text...</p>
+              </div>
+
+              <div>
+                <h3 class="font-pixel text-lg text-forest font-bold mb-1">🌍 Real-World Applications</h3>
+                <ul id="branch-apps" class="list-disc pl-5 space-y-1 text-slate/90">
+                  <!-- Dynamic JS insert -->
+                </ul>
+              </div>
+
+              <!-- High School Career Pathways -->
+              <div class="p-4 bg-sand/50 rounded border border-sage/40 space-y-2">
+                <h3 class="font-pixel text-base text-brown font-bold flex items-center gap-1.5">
+                  <span>💼</span> Target Careers & Salaries
+                </h3>
+                <div id="branch-careers" class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <!-- Dynamic JS insert -->
+                </div>
+              </div>
+
+              <!-- High School Internship & Skill Prep -->
+              <div class="p-4 bg-sage/10 rounded border border-sage/40 space-y-2">
+                <h3 class="font-pixel text-base text-forest font-bold flex items-center gap-1.5">
+                  <span>🎒</span> High School Student & Internship Prep Tips
+                </h3>
+                <p id="branch-hs-tips" class="text-xs text-slate">Preparation advice...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Interactive Mini-Simulation Box -->
+        <div class="lg:col-span-5">
+          <div class="pixel-box p-5 rounded-lg bg-sand/60 sticky top-24 space-y-4">
+            <div class="flex items-center justify-between border-b border-forest/20 pb-2">
+              <span class="font-pixel text-lg text-forest font-bold">🔬 Interactive Lab Simulator</span>
+              <span class="text-xs text-brown font-pixel font-bold">HS CTE LAB #<span id="sim-id-num">01</span></span>
+            </div>
+
+            <div id="sim-container" class="bg-white p-4 rounded border border-forest/30 space-y-4">
+              <!-- Dynamic Mini-Game Interactive Simulation Interface Rendered Here -->
+            </div>
+
+            <div class="text-[11px] text-slate/80 font-mono bg-white/60 p-2 rounded border border-slate/20">
+              ℹ️ <strong>Learning Objective:</strong> Complete this mini-simulation correctly to earn credit towards the <strong class="text-forest">Lab Master Badge</strong>!
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: 🎓 TOP NJ COLLEGES SECTION          -->
+    <!-- ========================================== -->
+    <section id="tab-content-colleges" class="hidden space-y-6">
+      
+      <!-- Section Intro Header -->
+      <div class="pixel-box p-6 rounded-lg bg-gradient-to-r from-sand to-parchment">
+        <div class="max-w-3xl space-y-2">
+          <span class="px-2.5 py-1 bg-brown text-gold text-xs font-pixel rounded uppercase font-bold">Higher Education Pathways</span>
+          <h2 class="pixel-font text-2xl md:text-3xl text-forest font-bold">Top New Jersey Colleges for Biotechnology</h2>
+          <p class="text-slate text-sm">
+            Explore premier higher-education biotech programs across New Jersey tailored for high school CTE graduates. Compare tuition rates, specializations, laboratory focus, and internship pipelines.
+          </p>
+        </div>
+
+        <!-- Interactive Filter Bar -->
+        <div class="mt-4 pt-4 border-t border-forest/20 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-pixel font-bold text-forest">Filter Tuition:</span>
+            <button onclick="filterColleges('all')" id="cfilter-all" class="px-2.5 py-1 bg-forest text-parchment rounded font-pixel">All Colleges</button>
+            <button onclick="filterColleges('low')" id="cfilter-low" class="px-2.5 py-1 bg-sand hover:bg-parchment rounded font-pixel text-slate">In-State &lt; $15k</button>
+            <button onclick="filterColleges('equal')" id="cfilter-equal" class="px-2.5 py-1 bg-sand hover:bg-parchment rounded font-pixel text-slate">Flat Rate Tuition</button>
+          </div>
+          <div class="font-mono text-clay font-bold">
+            4 Notable Programs Selected
+          </div>
+        </div>
+      </div>
+
+      <!-- College Cards Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="college-cards-grid">
+        
+        <!-- Rutgers University -->
+        <div class="college-card pixel-box p-6 rounded-lg bg-white space-y-4 flex flex-col justify-between" data-instate="18000">
+          <div>
+            <div class="flex items-start justify-between border-b border-sand pb-3 mb-3">
+              <div>
+                <span class="px-2 py-0.5 bg-clay/20 text-clay text-[11px] font-pixel rounded font-bold">Research University</span>
+                <h3 class="pixel-font text-2xl font-bold text-forest mt-1">Rutgers University</h3>
+                <p class="text-xs text-slate font-medium">📍 Locations: New Brunswick NJ, Newark NJ, Camden NJ</p>
+              </div>
+              <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-2xl border border-red-300">
+                🏛️
+              </div>
+            </div>
+
+            <!-- Tuition Badge Block -->
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">IN-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-forest">$18,000 - $19,400</div>
+              </div>
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">OUT-OF-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-brown">$37,000 - $41,000</div>
+              </div>
+            </div>
+
+            <!-- Program Description -->
+            <p class="text-xs md:text-sm text-slate leading-relaxed">
+              Rutgers has an exceptional biotechnology program that teaches critical real-world skills like proficiency in using modern biotechnology tools, reading and critiquing scientific journals, and working as a cohesive team in advanced laboratory settings.
+            </p>
+          </div>
+
+          <div class="pt-3 border-t border-sand flex items-center justify-between">
+            <span class="text-[11px] font-mono text-sage font-bold">Key Strengths: Lab Teamwork & Journal Mastery</span>
+            <button onclick="calcCollegeTuition('Rutgers University', 18700, 39000)" class="pixel-btn px-3 py-1.5 bg-sage text-parchment text-xs font-pixel rounded font-bold">
+              💰 Calculate Cost
+            </button>
+          </div>
+        </div>
+
+        <!-- William Paterson University -->
+        <div class="college-card pixel-box p-6 rounded-lg bg-white space-y-4 flex flex-col justify-between" data-instate="8379">
+          <div>
+            <div class="flex items-start justify-between border-b border-sand pb-3 mb-3">
+              <div>
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[11px] font-pixel rounded font-bold">Best Value Pathway</span>
+                <h3 class="pixel-font text-2xl font-bold text-forest mt-1">William Paterson University</h3>
+                <p class="text-xs text-slate font-medium">📍 Location: Wayne, NJ</p>
+              </div>
+              <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-2xl border border-emerald-300">
+                🔬
+              </div>
+            </div>
+
+            <!-- Tuition Badge Block -->
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">IN-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-forest">$8,379</div>
+              </div>
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">OUT-OF-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-brown">$13,692</div>
+              </div>
+            </div>
+
+            <!-- Program Description -->
+            <p class="text-xs md:text-sm text-slate leading-relaxed">
+              At William Paterson University, students can complete a comprehensive 30-credit biotechnology course sequence that lays down a solid foundation for any biotech career. Core topics include gene expression, cell and tissue culture, recombinant DNA technology, and structural biology.
+            </p>
+          </div>
+
+          <div class="pt-3 border-t border-sand flex items-center justify-between">
+            <span class="text-[11px] font-mono text-sage font-bold">Key Strengths: 30-Credit Recombinant DNA Core</span>
+            <button onclick="calcCollegeTuition('William Paterson University', 8379, 13692)" class="pixel-btn px-3 py-1.5 bg-sage text-parchment text-xs font-pixel rounded font-bold">
+              💰 Calculate Cost
+            </button>
+          </div>
+        </div>
+
+        <!-- Kean University -->
+        <div class="college-card pixel-box p-6 rounded-lg bg-white space-y-4 flex flex-col justify-between" data-instate="16370">
+          <div>
+            <div class="flex items-start justify-between border-b border-sand pb-3 mb-3">
+              <div>
+                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-[11px] font-pixel rounded font-bold">Startup & Industry Network</span>
+                <h3 class="pixel-font text-2xl font-bold text-forest mt-1">Kean University</h3>
+                <p class="text-xs text-slate font-medium">📍 Location: Union, NJ</p>
+              </div>
+              <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-2xl border border-amber-300">
+                🧫
+              </div>
+            </div>
+
+            <!-- Tuition Badge Block -->
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">IN-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-forest">$16,370</div>
+              </div>
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">OUT-OF-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-forest">$16,370 <span class="text-[10px] font-sans font-normal">(Equal!)</span></div>
+              </div>
+            </div>
+
+            <!-- Program Description -->
+            <p class="text-xs md:text-sm text-slate leading-relaxed">
+              Kean University offers an outstanding biotechnology program focusing on cutting-edge topics like antibiotic resistance. Students interact directly with successful biotech startup founders and gain direct access to internship and career opportunities across over 100 research facilities.
+            </p>
+          </div>
+
+          <div class="pt-3 border-t border-sand flex items-center justify-between">
+            <span class="text-[11px] font-mono text-sage font-bold">Key Strengths: 100+ Research Internship Partners</span>
+            <button onclick="calcCollegeTuition('Kean University', 16370, 16370)" class="pixel-btn px-3 py-1.5 bg-sage text-parchment text-xs font-pixel rounded font-bold">
+              💰 Calculate Cost
+            </button>
+          </div>
+        </div>
+
+        <!-- Saint Peter's University -->
+        <div class="college-card pixel-box p-6 rounded-lg bg-white space-y-4 flex flex-col justify-between" data-instate="41770">
+          <div>
+            <div class="flex items-start justify-between border-b border-sand pb-3 mb-3">
+              <div>
+                <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[11px] font-pixel rounded font-bold">Biomedical & Clinical Focus</span>
+                <h3 class="pixel-font text-2xl font-bold text-forest mt-1">Saint Peter's University</h3>
+                <p class="text-xs text-slate font-medium">📍 Location: Jersey City, NJ</p>
+              </div>
+              <div class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-2xl border border-indigo-300">
+                🏥
+              </div>
+            </div>
+
+            <!-- Tuition Badge Block -->
+            <div class="grid grid-cols-2 gap-2 my-3 text-xs">
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">IN-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-forest">$41,770</div>
+              </div>
+              <div class="p-2.5 bg-sand/60 rounded border border-sage/30">
+                <div class="text-[10px] text-slate/70 font-mono">OUT-OF-STATE TUITION</div>
+                <div class="font-pixel text-base font-bold text-brown">$41,770</div>
+              </div>
+            </div>
+
+            <!-- Program Description -->
+            <p class="text-xs md:text-sm text-slate leading-relaxed">
+              Saint Peter's University focuses heavily on biomedical applications of biotechnology by teaching coursework across multiple distinct scientific disciplines and offering clinical internships at notable medical and health institutions.
+            </p>
+          </div>
+
+          <div class="pt-3 border-t border-sand flex items-center justify-between">
+            <span class="text-[11px] font-mono text-sage font-bold">Key Strengths: Medical & Clinical Internships</span>
+            <button onclick="calcCollegeTuition('Saint Peter\'s University', 41770, 41770)" class="pixel-btn px-3 py-1.5 bg-sage text-parchment text-xs font-pixel rounded font-bold">
+              💰 Calculate Cost
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Interactive Tuition Estimator Modal / Panel -->
+      <div id="tuition-calculator-panel" class="pixel-box p-6 rounded-lg bg-sand/50 space-y-4">
+        <h3 class="pixel-font text-xl text-forest font-bold flex items-center gap-2">
+          <span>🧮</span> Interactive Biotech College Tuition Estimator
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div>
+            <label class="block font-pixel text-forest font-bold mb-1">Selected College:</label>
+            <input id="calc-college-name" type="text" readonly value="Rutgers University" class="w-full p-2 bg-white rounded border border-forest/30 font-bold text-forest">
+          </div>
+          <div>
+            <label class="block font-pixel text-forest font-bold mb-1">Residency Status:</label>
+            <select id="calc-residency" onchange="updateTuitionCalc()" class="w-full p-2 bg-white rounded border border-forest/30 font-bold">
+              <option value="inState">In-State Resident (NJ)</option>
+              <option value="outOfState">Out-of-State Student</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-pixel text-forest font-bold mb-1">Program Duration:</label>
+            <select id="calc-years" onchange="updateTuitionCalc()" class="w-full p-2 bg-white rounded border border-forest/30 font-bold">
+              <option value="4">4 Years (B.S. Degree)</option>
+              <option value="2">2 Years (Transfer Pathway)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Calculated Output Banner -->
+        <div class="p-4 bg-white rounded border-2 border-forest flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <div class="text-xs text-slate/70 font-mono">ESTIMATED TOTAL TUITION COST</div>
+            <div id="calc-result-price" class="pixel-font text-3xl text-clay font-bold">$74,800</div>
+          </div>
+          <div class="text-xs text-slate max-w-md">
+            💡 <em>Tip for CTE Students:</em> Many NJ biotechnology programs offer merit scholarships, grant offsets, and CTE dual-enrollment credits that significantly reduce out-of-pocket costs!
+          </div>
+        </div>
+      </div>
+
+      <!-- High School CTE Preparation Checklist -->
+      <div class="pixel-box p-6 rounded-lg bg-white space-y-4">
+        <h3 class="pixel-font text-xl text-forest font-bold flex items-center gap-2">
+          <span>📋</span> High School CTE College Prep Checklist
+        </h3>
+        <p class="text-xs text-slate">Check off items as you complete them during high school to stay on track for college admission:</p>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Complete AP Biology / Chemistry Coursework</span>
+          </label>
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Maintain a Standardized Lab Notebook</span>
+          </label>
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Master Micropipetting & Aseptic Technique</span>
+          </label>
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Participate in TSA / HOSA Bio Competitions</span>
+          </label>
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Shadow a Researcher at a Local NJ Facility</span>
+          </label>
+          <label class="p-2.5 bg-sand/30 rounded border border-sage/30 flex items-center gap-2 cursor-pointer hover:bg-sand/60">
+            <input type="checkbox" onchange="checkBioScholarRequirement()" class="accent-forest w-4 h-4">
+            <span>Earn High School Biotech CTE Certificate</span>
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: 🎮 CTE GAME PORTAL SECTION          -->
+    <!-- ========================================== -->
+    <section id="tab-content-game" class="space-y-6 hidden">
+      
+      <!-- Video Game Embed Frame Header Controls -->
+      <div class="pixel-box p-4 rounded-lg bg-forest text-parchment space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-sage-light/30 pb-3">
+          <div>
+            <span class="px-2 py-0.5 bg-clay text-parchment text-xs font-pixel rounded">Biotech CTE Game Project</span>
+            <h2 class="pixel-font text-2xl font-bold text-gold mt-0.5">Interactive CTE Game Portal</h2>
+          </div>
+
+          <!-- Controls Bar -->
+          <div class="flex flex-wrap items-center gap-2 text-xs">
+            <button onclick="toggleGameFullscreen()" class="pixel-btn px-3 py-1.5 bg-sage hover:bg-sage-light text-parchment rounded font-pixel font-bold">
+              ⛶ Fullscreen
+            </button>
+            <button onclick="reloadGameFrame()" class="pixel-btn px-3 py-1.5 bg-brown hover:bg-clay text-parchment rounded font-pixel font-bold">
+              🔄 Reload Frame
+            </button>
+          </div>
+        </div>
+
+        <!-- External Link Integration Bar -->
+        <div class="space-y-2">
+          <label class="block text-xs font-pixel text-sand">
+            🔗 Embed External Game Link (Scratch, itch.io, Unity WebGL, or custom HTML game URL):
+          </label>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="custom-game-url-input" type="url" placeholder="https://your-game-url-here.com or itch.io embed link..." class="flex-grow p-2 rounded bg-parchment text-slate font-mono text-xs border border-forest-dark focus:outline-none focus:ring-2 focus:ring-gold">
+            <button onclick="loadCustomGameUrl()" class="pixel-btn px-4 py-2 bg-clay hover:bg-brown text-parchment font-pixel text-xs rounded font-bold whitespace-nowrap">
+              Load Custom Game
+            </button>
+            <button onclick="resetBuiltInGame()" class="pixel-btn px-3 py-2 bg-sage text-parchment font-pixel text-xs rounded font-bold whitespace-nowrap">
+              Play Built-In Demo Game
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Embed Frame / Game Display Canvas Cabinet -->
+      <div id="game-portal-cabinet" class="pixel-box p-3 md:p-6 rounded-lg bg-brown text-parchment space-y-4">
+        
+        <div class="flex items-center justify-between text-xs font-pixel text-gold">
+          <span>PORTAL SCREEN STATE: <span id="game-source-label" class="text-sand">BUILT-IN LAB RUNNER DEMO</span></span>
+          <span class="animate-pulse">● LIVE DISPLAY</span>
+        </div>
+
+        <!-- Frame Container -->
+        <div id="game-frame-wrapper" class="relative w-full aspect-[16/9] bg-slate rounded border-4 border-forest-dark overflow-hidden shadow-2xl">
+          
+          <!-- Embedded Iframe (Hidden when using built-in arcade canvas) -->
+          <iframe id="external-game-iframe" class="hidden w-full h-full border-0" allowfullscreen allow="autoplay; gamepad"></iframe>
+
+          <!-- Built-In Playable Arcade Game Canvas (Active by Default) -->
+          <div id="builtin-game-container" class="w-full h-full relative bg-slate flex flex-col justify-between">
+            <canvas id="builtin-game-canvas" class="w-full h-full block"></canvas>
+
+            <!-- Game Overlay UI Controls -->
+            <div id="builtin-game-overlay" class="absolute inset-0 bg-forest-dark/85 p-6 flex flex-col items-center justify-center text-center space-y-4">
+              <span class="text-4xl">🧬</span>
+              <h3 class="pixel-font text-3xl font-bold text-gold">Biotech Lab Runner & Quiz Challenge</h3>
+              <p class="text-xs text-sand max-w-md">
+                Guide the CTE researcher across the lab! Jump over hazardous chemical spills, collect DNA double helixes, and answer CTE biotech quiz questions to score points.
+              </p>
+              <button onclick="startBuiltInGame()" class="pixel-btn px-6 py-3 bg-clay text-parchment font-pixel text-base font-bold rounded">
+                🚀 Start Game Session
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Game Controls & Lore Information Card -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans">
+          
+          <!-- Controls Guide -->
+          <div class="p-4 bg-forest-dark/70 rounded border border-sage/40 space-y-2">
+            <h4 class="font-pixel text-sm text-gold font-bold flex items-center gap-1.5">
+              <span>🎮</span> Game Controls Guide
+            </h4>
+            <ul class="space-y-1 text-sand">
+              <li>• <strong class="text-parchment">SPACEBAR / UP ARROW / TAP:</strong> Jump over lab hazards</li>
+              <li>• <strong class="text-parchment">MOUSE CLICK:</strong> Select quiz answers during pop-ups</li>
+              <li>• <strong class="text-parchment">EXTERNAL GAMES:</strong> Full WASD, arrow keys, and gamepad support enabled!</li>
+            </ul>
+          </div>
+
+          <!-- Project Lore -->
+          <div class="p-4 bg-forest-dark/70 rounded border border-sage/40 space-y-2">
+            <h4 class="font-pixel text-sm text-gold font-bold flex items-center gap-1.5">
+              <span>📖</span> CTE Game Lore & Purpose
+            </h4>
+            <p class="text-sand leading-relaxed">
+              Designed as an immersive educational portal for New Jersey CTE high school students. It seamlessly blends video game mechanics with core biotechnology concepts, college pathways, and career readiness.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: 🏆 BADGES & ACHIEVEMENTS SECTION    -->
+    <!-- ========================================== -->
+    <section id="tab-content-badges" class="space-y-6 hidden">
+      
+      <!-- Achievement Progress Overview Banner -->
+      <div class="pixel-box p-6 rounded-lg bg-gradient-to-r from-sand to-parchment space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <span class="px-2.5 py-1 bg-gold text-forest text-xs font-pixel rounded font-bold">CTE Mastery Progress</span>
+            <h2 class="pixel-font text-2xl md:text-3xl text-forest font-bold mt-1">Badges & Achievements</h2>
+            <p class="text-xs text-slate mt-1">
+              Earn badges by exploring the archipelago islands, completing interactive lab simulations, inspecting NJ biotech colleges, and playing the CTE game portal!
+            </p>
+          </div>
+
+          <!-- Total Completion Percentage -->
+          <div class="text-right">
+            <div class="text-xs text-slate/70 font-mono">TOTAL COMPLETION</div>
+            <div id="badge-total-percentage" class="pixel-font text-4xl text-clay font-bold">0%</div>
+          </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-sand h-4 rounded-full border border-forest overflow-hidden p-0.5">
+          <div id="badge-progress-bar" class="bg-gradient-to-r from-sage to-gold h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Badges Cards Grid -->
+      <div id="badges-container-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Dynamic Badges Inserted Here via JS -->
+      </div>
+
+      <!-- LocalStorage Reset Action -->
+      <div class="pt-4 border-t border-forest/20 flex justify-end">
+        <button onclick="resetAllProgress()" class="pixel-btn px-4 py-2 bg-clay text-parchment font-pixel text-xs rounded font-bold">
+          ⚠️ Reset All Achievement Progress
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MAIN FOOTER -->
+  <footer class="bg-forest-dark text-sand py-6 border-t-4 border-forest mt-12 text-xs">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div>
+        <div class="font-pixel text-sm text-gold font-bold">BIOTECH CTE ARCHIPELAGO PROJECT</div>
+        <p class="text-[11px] text-sand/80">Tailored for High School Students Exploring Biotech Careers, Colleges & Internships</p>
+      </div>
+      <div class="font-mono text-[11px] text-sand/60">
+        NJ CTE Science Pathways • Built with Modern Web & Canvas Technology
+      </div>
+    </div>
+  </footer>
+
+  <!-- APPLICATION LOGIC & INTERACTIVE SIMULATIONS JS -->
+  <script>
+    /* ========================================== */
+    /* GLOBAL STATE & LOCALSTORAGE PERSISTENCE    */
+    /* ========================================== */
+    const state = {
+      currentTab: 'map',
+      selectedBranch: 'microbial',
+      visitedIslands: new Set(),
+      visitedColleges: new Set(),
+      completedSims: new Set(),
+      gameTested: false,
+      bioScholarReqs: 0,
+      soundEnabled: true,
+      
+      // Badges definitions
+      badges: [
+        { id: 'island_pioneer', name: 'Island Pioneer', desc: 'Visit all 8 biotech branch islands on the world map', icon: '🏝️', total: 8 },
+        { id: 'college_scout', name: 'College Scout', desc: 'Inspect details for all 4 New Jersey Biotech Universities', icon: '🎓', total: 4 },
+        { id: 'lab_master', name: 'Lab Master', desc: 'Complete all 8 interactive biotech mini-simulations', icon: '🔬', total: 8 },
+        { id: 'game_tester', name: 'CTE Game Tester', desc: 'Launch or play a session in the CTE Game Portal', icon: '🎮', total: 1 },
+        { id: 'bio_scholar', name: 'Bio Scholar Roadmap', desc: 'Check off high school preparation checklist items', icon: '📜', total: 3 }
+      ]
+    };
+
+    /* Load saved state from localStorage */
+    function loadSavedState() {
+      try {
+        const saved = localStorage.getItem('biotech_cte_state');
+        if (saved) {
+          const data = JSON.parse(saved);
+          if (data.visitedIslands) state.visitedIslands = new Set(data.visitedIslands);
+          if (data.visitedColleges) state.visitedColleges = new Set(data.visitedColleges);
+          if (data.completedSims) state.completedSims = new Set(data.completedSims);
+          if (data.gameTested) state.gameTested = data.gameTested;
+          if (data.bioScholarReqs) state.bioScholarReqs = data.bioScholarReqs;
+        }
+      } catch (e) {
+        console.warn('Could not load localStorage progress:', e);
+      }
+      updateBadgeUI();
+    }
+
+    function saveState() {
+      try {
+        const data = {
+          visitedIslands: Array.from(state.visitedIslands),
+          visitedColleges: Array.from(state.visitedColleges),
+          completedSims: Array.from(state.completedSims),
+          gameTested: state.gameTested,
+          bioScholarReqs: state.bioScholarReqs
+        };
+        localStorage.setItem('biotech_cte_state', JSON.stringify(data));
+      } catch (e) {
+        console.warn('Could not save localStorage progress:', e);
+      }
+      updateBadgeUI();
+    }
+
+    /* ========================================== */
+    /* AUDIO SYNTHESIZER (WEB AUDIO API)          */
+    /* ========================================== */
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        const now = ctx.currentTime;
+        if (type === 'click') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450, now);
+          osc.frequency.exponentialRampToValueAtTime(750, now + 0.05);
+          gain.gain.setValueAtTime(0.1, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+          osc.start(now);
+          osc.stop(now + 0.05);
+        } else if (type === 'success') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+          osc.start(now);
+          osc.stop(now + 0.3);
+        } else if (type === 'badge') {
+          osc.type = 'square';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.1);
+          osc.frequency.setValueAtTime(659.25, now + 0.2);
+          osc.frequency.setValueAtTime(880, now + 0.3);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        }
+      } catch (e) {
+        // Ignore autoplay restrictions
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('sound-text').innerText = state.soundEnabled ? 'SFX: ON' : 'SFX: OFF';
+      document.getElementById('sound-icon').innerText = state.soundEnabled ? '🔊' : '🔇';
+      playSound('click');
+    }
+
+    /* ========================================== */
+    /* CONFETTI CELEBRATION ANIMATION             */
+    /* ========================================== */
+    function triggerConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#b85d38', '#4a7c59', '#88a070', '#d4af37', '#5c4033'];
+
+      for (let i = 0; i < 90; i++) {
+        particles.push({
+          x: canvas.width / 2,
+          y: canvas.height / 3,
+          vx: (Math.random() - 0.5) * 14,
+          vy: (Math.random() - 0.7) * 16,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          gravity: 0.28,
+          rotation: Math.random() * 360,
+          vRot: (Math.random() - 0.5) * 12,
+          life: 1.0
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let alive = false;
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.rotation += p.vRot;
+          p.life -= 0.015;
+
+          if (p.life > 0) {
+            alive = true;
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rotation * Math.PI) / 180);
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+            ctx.restore();
+          }
+        });
+
+        if (alive) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+
+    /* ========================================== */
+    /* TAB SWITCHING SYSTEM                       */
+    /* ========================================== */
+    function switchTab(tabId) {
+      state.currentTab = tabId;
+      playSound('click');
+
+      const tabs = ['map', 'branches', 'colleges', 'game', 'badges'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        if (t === tabId) {
+          btn.classList.add('active', 'bg-forest', 'text-parchment');
+          btn.classList.remove('bg-sand', 'text-slate');
+          content.classList.remove('hidden');
+        } else {
+          btn.classList.remove('active', 'bg-forest', 'text-parchment');
+          btn.classList.add('bg-sand', 'text-slate');
+          content.classList.add('hidden');
+        }
+      });
+
+      if (tabId === 'map') {
+        renderMapCanvas();
+      } else if (tabId === 'branches') {
+        renderBranchView();
+      } else if (tabId === 'colleges') {
+        // Mark all colleges visited when inspecting tab
+        ['rutgers', 'wpaterson', 'kean', 'stpeters'].forEach(c => state.visitedColleges.add(c));
+        saveState();
+      }
+    }
+
+    /* ========================================== */
+    /* BIOTECH BRANCH DATA ARCHITECTURE           */
+    /* ========================================== */
+    const branchData = {
+      microbial: {
+        title: 'Microbial Biotechnology',
+        subtitle: 'Industrial Bio-Fermentation & Microbial Synthesis',
+        icon: '🦠',
+        overview: 'Microbial biotechnology harnesses bacteria, yeast, fungi, and enzymes for biological manufacturing, biofuels, bio-plastics, and therapeutic proteins. Microorganisms act as living microscopic factories to convert sugars into high-value chemicals.',
+        apps: [
+          'Production of recombinant human insulin using E. coli bacteria',
+          'Biofuel ethanol synthesis from industrial yeast fermentation',
+          'Enzyme production for eco-friendly laundry detergents and food processing'
+        ],
+        careers: [
+          { role: 'Fermentation Technician', salary: '$52,000 - $72,000', edu: 'HS CTE / Assoc Degree' },
+          { role: 'Industrial Microbiologist', salary: '$78,000 - $110,000', edu: 'B.S. Biotechnology' },
+          { role: 'Bio-Process Engineer', salary: '$88,000 - $125,000', edu: 'B.S. Chemical / Bio Eng' }
+        ],
+        hsTips: 'Focus on practicing aseptic lab technique, streak-plating agar petri dishes, calculating serial dilutions, and maintaining sterile growth cultures.'
+      },
+      agricultural: {
+        title: 'Agricultural Biotechnology',
+        subtitle: 'Crop Genetics, Bio-Domes & Sustainable Agriculture',
+        icon: '🌱',
+        overview: 'Agricultural biotechnology uses genetic engineering and molecular markers to enhance crop drought resistance, boost nutritional yield (e.g. Golden Rice), reduce chemical pesticide reliance, and optimize soil microbiome health.',
+        apps: [
+          'Drought-tolerant corn and soybean crop varieties',
+          'Bt crops engineered for natural insect resistance',
+          'Soil probiotic microbes that fix atmospheric nitrogen naturally'
+        ],
+        careers: [
+          { role: 'Plant Biotech Specialist', salary: '$55,000 - $78,000', edu: 'B.S. Plant Science / Biotech' },
+          { role: 'Crop Geneticist', salary: '$82,000 - $118,000', edu: 'B.S. / M.S. Genetics' },
+          { role: 'Agronomy Field Tech', salary: '$48,000 - $68,000', edu: 'HS CTE Pathway' }
+        ],
+        hsTips: 'Learn greenhouse tissue culture protocols, study Mendelian inheritance patterns, and practice micropipetting plant DNA extraction kits.'
+      },
+      animal: {
+        title: 'Animal Biotechnology',
+        subtitle: 'Transgenic Livestock, GFP Markers & Veterinary Medicine',
+        icon: '🐾',
+        overview: 'Animal biotechnology centers on transgenic animal models, therapeutic proteins produced in livestock milk (pharmacing), animal disease diagnostic panels, cloned livestock conservation, and reproductive technology.',
+        apps: [
+          'Transgenic livestock producing human therapeutic antibodies in milk',
+          'Fluorescent GFP gene markers for studying livestock organ development',
+          'Genomic selection markers to eliminate hereditary diseases in cattle'
+        ],
+        careers: [
+          { role: 'Veterinary Lab Specialist', salary: '$50,000 - $70,000', edu: 'B.S. Animal Science' },
+          { role: 'Transgenic Animal Geneticist', salary: '$85,000 - $120,000', edu: 'B.S. / Ph.D. Genetics' },
+          { role: 'Embryology Technician', salary: '$62,000 - $88,000', edu: 'Assoc / B.S. Biotech' }
+        ],
+        hsTips: 'Master microscopic tissue slide observation, practice livestock genetic pedigree analysis, and study bioethics guidelines regarding animal research.'
+      },
+      forensic: {
+        title: 'Forensic Biotechnology',
+        subtitle: 'DNA Profiling, Gel Electrophoresis & STR Identification',
+        icon: '🧬',
+        overview: 'Forensic biotechnology utilizes molecular tools—such as PCR amplification, Gel Electrophoresis, and Short Tandem Repeat (STR) profiling—to analyze biological crime scene evidence and identify missing persons through national databases like CODIS.',
+        apps: [
+          'STR DNA fingerprint matching from crime scene biological evidence',
+          'Mitochondrial DNA sequencing for cold-case identification',
+          'Paternity and forensic genealogy ancestor tracking'
+        ],
+        careers: [
+          { role: 'Forensic DNA Analyst', salary: '$65,000 - $95,000', edu: 'B.S. Forensic Science / Bio' },
+          { role: 'Crime Scene Molecular Specialist', salary: '$58,000 - $82,000', edu: 'B.S. Biotechnology' },
+          { role: 'Serology Lab Tech', salary: '$48,000 - $68,000', edu: 'HS CTE / Assoc Degree' }
+        ],
+        hsTips: 'Gain hands-on experience loading agarose gels, running gel electrophoresis chambers, interpreting DNA ladder bands, and recording meticulous evidence chain-of-custody.'
+      },
+      bioremediation: {
+        title: 'Bioremediation',
+        subtitle: 'Environmental Bio-Cleanup & Microbe Deployment',
+        icon: '🌊',
+        overview: 'Bioremediation employs living organisms—specifically specialized bacteria, fungi, and aquatic plants—to degrade environmental pollutants, oil spills, toxic heavy metals, pesticides, and microplastics into harmless byproducts.',
+        apps: [
+          'Oil-eating Pseudomonas and Ideonella bacteria deployed in coastal spills',
+          'Phytoremediation using poplars and wetlands to absorb heavy metals',
+          'Fungal bio-filters purifying municipal wastewater streams'
+        ],
+        careers: [
+          { role: 'Environmental Biotechnologist', salary: '$62,000 - $90,000', edu: 'B.S. Env Science / Biotech' },
+          { role: 'Bioremediation Field Engineer', salary: '$75,000 - $108,000', edu: 'B.S. Bioengineering' },
+          { role: 'Ecotoxicology Analyst', salary: '$58,000 - $84,000', edu: 'B.S. Biology' }
+        ],
+        hsTips: 'Study microbial ecology, test local soil and water pH levels, and learn how aerobic vs. anaerobic digestion breaks down organic waste.'
+      },
+      aquatic: {
+        title: 'Aquatic Biotechnology',
+        subtitle: 'Marine Conservation, Algal Biofuels & GFP Proteins',
+        icon: '🪼',
+        overview: 'Aquatic (Blue) biotechnology explores marine natural products, microalgae biofuels, aquaculture genetics, disease-resistant shellfish, and glowing Green Fluorescent Protein (GFP) originally isolated from Aequorea victoria jellyfish.',
+        apps: [
+          'GFP bio-markers used worldwide in cancer cell bio-imaging',
+          'Microalgae cultivation producing sustainable aviation biofuels',
+          'Aquaculture disease-resistance gene panels for Atlantic salmon'
+        ],
+        careers: [
+          { role: 'Marine Biotechnologist', salary: '$68,000 - $98,000', edu: 'B.S. Marine Bio / Biotech' },
+          { role: 'Algae Biofuel Specialist', salary: '$60,000 - $86,000', edu: 'B.S. Chemical Bio' },
+          { role: 'Aquaculture Genetics Tech', salary: '$50,000 - $72,000', edu: 'Assoc / B.S. Science' }
+        ],
+        hsTips: 'Practice spectrophotometry measurement, learn marine organism culturing techniques, and study protein extraction and fluorometry.'
+      },
+      medical: {
+        title: 'Medical Biotechnology',
+        subtitle: 'Monoclonal Antibodies, CRISPR & Drug Discovery',
+        icon: '🩺',
+        overview: 'Medical biotechnology is the largest biotech sector, responsible for developing vaccines, monoclonal antibody therapeutics, CRISPR gene editing, diagnostic test kits, and cell therapies to combat diseases like cancer and autoimmune disorders.',
+        apps: [
+          'CRISPR-Cas9 gene therapy curing sickle cell disease',
+          'mRNA vaccines engineered for rapid viral protection',
+          'Monoclonal antibodies targeting specific cancer tumor markers'
+        ],
+        careers: [
+          { role: 'Biomedical Research Scientist', salary: '$85,000 - $130,000', edu: 'B.S. / Ph.D. Biomedical' },
+          { role: 'Clinical Assay Technologist', salary: '$58,000 - $82,000', edu: 'B.S. Biotechnology' },
+          { role: 'Cell Culture Specialist', salary: '$62,000 - $88,000', edu: 'B.S. Biology / CTE' }
+        ],
+        hsTips: 'Study cell biology fundamentals, practice micropipetting micro-volumes (1-10 μL), and perform Kirby-Bauer antibiotic sensitivity assays.'
+      },
+      regulatory: {
+        title: 'Regulatory Biotechnology',
+        subtitle: 'FDA/EPA/USDA Compliance, Ethics & Bio-Safety',
+        icon: '⚖️',
+        overview: 'Regulatory biotechnology ensures that all biotech products—drugs, GMO crops, medical devices—are safe, ethical, and effective before reaching the public. Regulatory specialists guide innovations through rigorous FDA, EPA, and USDA approval pathways.',
+        apps: [
+          'FDA Phase I-III clinical trial safety monitoring for new therapeutics',
+          'EPA environmental impact assessment for bio-pesticides',
+          'USDA bio-safety protocols for transgenic plant field trials'
+        ],
+        careers: [
+          { role: 'Regulatory Affairs Specialist', salary: '$80,000 - $120,000', edu: 'B.S. Science / Law' },
+          { role: 'Bio-Safety Quality Inspector', salary: '$65,000 - $92,000', edu: 'B.S. Biotechnology' },
+          { role: 'Clinical Compliance Auditor', salary: '$72,000 - $105,000', edu: 'B.S. Healthcare / Bio' }
+        ],
+        hsTips: 'Learn Good Laboratory Practice (GLP) standards, maintain accurate lab notebook documentation, and study FDA approval flowcharts.'
+      }
+    };
+
+    function selectBranch(key) {
+      state.selectedBranch = key;
+      state.visitedIslands.add(key);
+      saveState();
+
+      // Highlight active nav button
+      Object.keys(branchData).forEach(b => {
+        const btn = document.getElementById(`bnav-${b}`);
+        if (btn) {
+          if (b === key) {
+            btn.className = 'pixel-btn px-3 py-2 bg-forest text-parchment font-pixel text-xs rounded whitespace-nowrap';
+          } else {
+            btn.className = 'pixel-btn px-3 py-2 bg-sand hover:bg-parchment font-pixel text-xs rounded whitespace-nowrap';
+          }
+        }
+      });
+
+      switchTab('branches');
+    }
+
+    function renderBranchView() {
+      const data = branchData[state.selectedBranch];
+      if (!data) return;
+
+      document.getElementById('branch-icon').innerText = data.icon;
+      document.getElementById('branch-title').innerText = data.title;
+      document.getElementById('branch-subtitle').innerText = data.subtitle;
+      document.getElementById('branch-overview').innerText = data.overview;
+      document.getElementById('branch-hs-tips').innerText = data.hsTips;
+
+      // Render apps
+      const appsUl = document.getElementById('branch-apps');
+      appsUl.innerHTML = data.apps.map(a => `<li>${a}</li>`).join('');
+
+      // Render careers
+      const careersDiv = document.getElementById('branch-careers');
+      careersDiv.innerHTML = data.careers.map(c => `
+        <div class="p-2 bg-white rounded border border-sage/30">
+          <div class="font-pixel font-bold text-forest">${c.role}</div>
+          <div class="text-clay font-bold">${c.salary}</div>
+          <div class="text-[10px] text-slate/70 font-mono">${c.edu}</div>
+        </div>
+      `).join('');
+
+      // Status badge
+      const isCompleted = state.completedSims.has(state.selectedBranch);
+      const statusBadge = document.getElementById('branch-badge-status');
+      if (isCompleted) {
+        statusBadge.className = 'px-2.5 py-1 bg-sage text-parchment border border-forest-dark text-xs font-pixel rounded font-bold';
+        statusBadge.innerText = 'SIM: PASSED ✓';
+      } else {
+        statusBadge.className = 'px-2.5 py-1 bg-clay text-parchment border border-forest-dark text-xs font-pixel rounded font-bold';
+        statusBadge.innerText = 'SIM: PENDING';
+      }
+
+      // Render specific interactive mini-game simulation
+      renderMiniSim(state.selectedBranch);
+    }
+
+    /* ========================================== */
+    /* INTERACTIVE MINI-LAB SIMULATIONS (8 TOTAL) */
+    /* ========================================== */
+    function renderMiniSim(branchKey) {
+      const simContainer = document.getElementById('sim-container');
+      simContainer.innerHTML = '';
+
+      if (branchKey === 'microbial') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🧪 Bacterial Culture Fermentation Tank</div>
+            <p class="text-slate text-[11px]">Adjust Temperature and pH sliders to hit the optimal microbial growth zone (37°C & pH 7.2) for maximum enzyme output!</p>
+            
+            <div>
+              <label class="block font-bold">Temperature: <span id="sim1-temp-val" class="text-clay">25</span>°C</label>
+              <input type="range" id="sim1-temp" min="10" max="60" value="25" oninput="updateSim1()" class="w-full accent-forest">
+            </div>
+
+            <div>
+              <label class="block font-bold">pH Level: <span id="sim1-ph-val" class="text-clay">5.0</span></label>
+              <input type="range" id="sim1-ph" min="2" max="12" step="0.2" value="5.0" oninput="updateSim1()" class="w-full accent-forest">
+            </div>
+
+            <div class="p-2.5 bg-sand rounded border border-forest/20 text-center">
+              <div class="text-[10px] text-slate/70">ENZYME YIELD METER</div>
+              <div id="sim1-yield-bar" class="w-full bg-slate/20 h-4 rounded overflow-hidden mt-1 border border-forest">
+                <div id="sim1-yield-fill" class="bg-sage h-full transition-all" style="width: 20%"></div>
+              </div>
+              <div id="sim1-yield-text" class="font-pixel text-sm font-bold text-forest mt-1">20% Yield (Sub-optimal)</div>
+            </div>
+
+            <button onclick="checkSim1Complete()" class="pixel-btn w-full py-2 bg-clay text-parchment font-pixel font-bold text-xs rounded">
+              🚀 Run Fermentation Batch
+            </button>
+          </div>
+        `;
+        updateSim1();
+      } 
+      else if (branchKey === 'agricultural') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🌱 Crop Drought Resistance Gene Splicer</div>
+            <p class="text-slate text-[11px]">Select the correct gene sequence to splice into NJ corn crops to survive a severe drought simulation.</p>
+
+            <div class="space-y-2">
+              <label class="block p-2 bg-sand/60 rounded border cursor-pointer hover:bg-sand">
+                <input type="radio" name="sim2-gene" value="wrong1" class="accent-forest"> 
+                <span class="font-bold">Gene Marker A:</span> Cry1Ac Bt Pest Resistance
+              </label>
+              <label class="block p-2 bg-sand/60 rounded border cursor-pointer hover:bg-sand">
+                <input type="radio" name="sim2-gene" value="correct" class="accent-forest"> 
+                <span class="font-bold">Gene Marker B:</span> OsDREB1A Drought & Osmotic Tolerance
+              </label>
+              <label class="block p-2 bg-sand/60 rounded border cursor-pointer hover:bg-sand">
+                <input type="radio" name="sim2-gene" value="wrong2" class="accent-forest"> 
+                <span class="font-bold">Gene Marker C:</span> Psy1 Golden Beta-Carotene Biosynthesis
+              </label>
+            </div>
+
+            <button onclick="checkSim2Complete()" class="pixel-btn w-full py-2 bg-sage text-parchment font-pixel font-bold text-xs rounded">
+              🌾 Test Spliced Seedlings in Drought
+            </button>
+            <div id="sim2-feedback" class="text-xs font-bold text-center"></div>
+          </div>
+        `;
+      }
+      else if (branchKey === 'animal') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🐾 Transgenic GFP UV Light Scanner</div>
+            <p class="text-slate text-[11px]">Slide the UV lamp wavelength to 488nm excitation to isolate transgenic GFP milk protein lines.</p>
+
+            <div>
+              <label class="block font-bold">UV Wavelength: <span id="sim3-wave-val" class="text-clay">350</span> nm</label>
+              <input type="range" id="sim3-wave" min="300" max="600" value="350" oninput="updateSim3()" class="w-full accent-forest">
+            </div>
+
+            <div id="sim3-sample-box" class="p-4 bg-slate text-center text-slate-400 font-pixel rounded border-2 border-forest transition-all">
+              [ SAMPLE TUBE: UV OFF ]
+            </div>
+
+            <button onclick="checkSim3Complete()" class="pixel-btn w-full py-2 bg-sage text-parchment font-pixel font-bold text-xs rounded">
+              🔬 Confirm Transgenic Line
+            </button>
+          </div>
+        `;
+        updateSim3();
+      }
+      else if (branchKey === 'forensic') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🧬 Gel Electrophoresis DNA Matcher</div>
+            <p class="text-slate text-[11px]">Compare crime scene DNA band ladder against 3 suspect DNA profiles to identify the matching pattern.</p>
+
+            <div class="p-3 bg-slate text-parchment font-mono text-[10px] rounded space-y-1">
+              <div>CRIME SCENE LADDER: [ |||  |  ||  | ]</div>
+              <div class="text-amber-300">SUSPECT #1 PATTERN: [ ||   ||  |  | ]</div>
+              <div class="text-emerald-300">SUSPECT #2 PATTERN: [ |||  |  ||  | ] (MATCH?)</div>
+              <div class="text-sky-300">SUSPECT #3 PATTERN: [ |  |||   |  || ]</div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+              <button onclick="checkSim4Complete(1)" class="pixel-btn py-1.5 bg-sand text-slate font-pixel">Suspect 1</button>
+              <button onclick="checkSim4Complete(2)" class="pixel-btn py-1.5 bg-sand text-slate font-pixel">Suspect 2</button>
+              <button onclick="checkSim4Complete(3)" class="pixel-btn py-1.5 bg-sand text-slate font-pixel">Suspect 3</button>
+            </div>
+            <div id="sim4-feedback" class="text-xs font-bold text-center"></div>
+          </div>
+        `;
+      }
+      else if (branchKey === 'bioremediation') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🌊 Coastal Oil Spill Microbe Deployment</div>
+            <p class="text-slate text-[11px]">Click on all 4 contaminated ocean zones to deploy oil-decomposing Pseudomonas bacteria!</p>
+
+            <div class="grid grid-cols-2 gap-2" id="sim5-grid">
+              <button onclick="cleanSpill(this)" class="p-3 bg-brown text-gold font-pixel rounded border border-forest">🛢️ Oil Spill Zone A</button>
+              <button onclick="cleanSpill(this)" class="p-3 bg-brown text-gold font-pixel rounded border border-forest">🛢️ Oil Spill Zone B</button>
+              <button onclick="cleanSpill(this)" class="p-3 bg-brown text-gold font-pixel rounded border border-forest">🛢️ Oil Spill Zone C</button>
+              <button onclick="cleanSpill(this)" class="p-3 bg-brown text-gold font-pixel rounded border border-forest">🛢️ Oil Spill Zone D</button>
+            </div>
+            <div id="sim5-status" class="text-xs font-bold text-center text-brown">4 Zones Contaminated</div>
+          </div>
+        `;
+      }
+      else if (branchKey === 'aquatic') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🪼 Deep-Sea GFP Bio-Luminescence Extractor</div>
+            <p class="text-slate text-[11px]">Calibrate emission filter to 509nm to extract pure glowing Green Fluorescent Protein.</p>
+
+            <div>
+              <label class="block font-bold">Emission Lens: <span id="sim6-filter-val" class="text-clay">400</span> nm</label>
+              <input type="range" id="sim6-filter" min="400" max="600" value="400" oninput="updateSim6()" class="w-full accent-forest">
+            </div>
+
+            <div id="sim6-glow-box" class="p-3 bg-slate text-center font-pixel rounded text-slate-400">
+              GFP EMISSION: 0% (Dark)
+            </div>
+
+            <button onclick="checkSim6Complete()" class="pixel-btn w-full py-2 bg-sage text-parchment font-pixel font-bold text-xs rounded">
+              🧫 Isolate GFP Sequence
+            </button>
+          </div>
+        `;
+        updateSim6();
+      }
+      else if (branchKey === 'medical') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">🩺 Antibiotic Disk Sensitivity Assay</div>
+            <p class="text-slate text-[11px]">Place Vancomycin antibiotic disk onto bacterial agar lawn to measure zone of inhibition.</p>
+
+            <div class="p-4 bg-emerald-100 rounded border-2 border-forest text-center space-y-2">
+              <div class="font-pixel text-forest font-bold">Agar Petri Dish Lawn</div>
+              <div id="sim7-disk-target" class="w-16 h-16 mx-auto bg-amber-200 rounded-full flex items-center justify-center font-pixel text-[10px] text-amber-900 border border-amber-400">
+                NO DISK
+              </div>
+            </div>
+
+            <button onclick="placeAntibioticDisk()" class="pixel-btn w-full py-2 bg-clay text-parchment font-pixel font-bold text-xs rounded">
+              🧫 Apply Vancomycin Disk
+            </button>
+            <div id="sim7-feedback" class="text-xs font-bold text-center"></div>
+          </div>
+        `;
+      }
+      else if (branchKey === 'regulatory') {
+        simContainer.innerHTML = `
+          <div class="space-y-3 text-xs">
+            <div class="font-pixel text-sm text-forest font-bold">⚖️ FDA 5-Phase Biotech Approval Challenge</div>
+            <p class="text-slate text-[11px]">Sequence the FDA therapeutic pipeline stages in correct chronological order:</p>
+
+            <div class="space-y-1.5 font-pixel text-[11px]">
+              <div class="p-2 bg-sand rounded border">1. Pre-Clinical Laboratory & Animal Testing</div>
+              <div class="p-2 bg-sand rounded border">2. Phase I Human Safety & Dosage Trial</div>
+              <div class="p-2 bg-sand rounded border">3. Phase II Therapeutic Efficacy Study</div>
+              <div class="p-2 bg-sand rounded border">4. Phase III Large-Scale Multi-Center Trial</div>
+              <div class="p-2 bg-sand rounded border">5. FDA Biological License Application (BLA) Review</div>
+            </div>
+
+            <button onclick="checkSim8Complete()" class="pixel-btn w-full py-2 bg-sage text-parchment font-pixel font-bold text-xs rounded">
+              ✅ Submit FDA Regulatory File
+            </button>
+            <div id="sim8-feedback" class="text-xs font-bold text-center"></div>
+          </div>
+        `;
+      }
+    }
+
+    /* Mini-Sim Handlers */
+    function updateSim1() {
+      const temp = parseFloat(document.getElementById('sim1-temp').value);
+      const ph = parseFloat(document.getElementById('sim1-ph').value);
+      document.getElementById('sim1-temp-val').innerText = temp;
+      document.getElementById('sim1-ph-val').innerText = ph;
+
+      const tempDiff = Math.abs(temp - 37);
+      const phDiff = Math.abs(ph - 7.2);
+      let yieldPct = Math.max(5, Math.round(100 - (tempDiff * 2.2) - (phDiff * 14)));
+
+      const fill = document.getElementById('sim1-yield-fill');
+      const text = document.getElementById('sim1-yield-text');
+      fill.style.width = yieldPct + '%';
+      
+      if (yieldPct > 80) {
+        fill.className = 'bg-emerald-500 h-full transition-all';
+        text.innerText = `${yieldPct}% Yield (OPTIMAL FERMENTATION!)`;
+        text.className = 'font-pixel text-sm font-bold text-emerald-700 mt-1';
+      } else {
+        fill.className = 'bg-sage h-full transition-all';
+        text.innerText = `${yieldPct}% Yield (Adjust Temp & pH)`;
+        text.className = 'font-pixel text-sm font-bold text-forest mt-1';
+      }
+    }
+
+    function checkSim1Complete() {
+      const temp = parseFloat(document.getElementById('sim1-temp').value);
+      const ph = parseFloat(document.getElementById('sim1-ph').value);
+      if (Math.abs(temp - 37) <= 4 && Math.abs(ph - 7.2) <= 0.8) {
+        completeSim('microbial');
+      } else {
+        playSound('click');
+        alert('Fermentation batch failed due to sub-optimal conditions! Target ~37°C and pH ~7.2.');
+      }
+    }
+
+    function checkSim2Complete() {
+      const selected = document.querySelector('input[name="sim2-gene"]:checked');
+      const feedback = document.getElementById('sim2-feedback');
+      if (selected && selected.value === 'correct') {
+        feedback.innerText = '✓ Success! OsDREB1A gene protected corn from drought!';
+        feedback.className = 'text-xs font-bold text-emerald-700 text-center';
+        completeSim('agricultural');
+      } else {
+        playSound('click');
+        feedback.innerText = '❌ Incorrect gene trait. Choose OsDREB1A for drought.';
+        feedback.className = 'text-xs font-bold text-clay text-center';
+      }
+    }
+
+    function updateSim3() {
+      const wave = document.getElementById('sim3-wave').value;
+      document.getElementById('sim3-wave-val').innerText = wave;
+      const box = document.getElementById('sim3-sample-box');
+      if (Math.abs(wave - 488) <= 25) {
+        box.className = 'p-4 bg-emerald-500 text-parchment font-pixel rounded border-2 border-forest shadow-lg';
+        box.innerText = '🌟 TRANSGENIC GFP FLUORESCENCE ACTIVE (488nm)';
+      } else {
+        box.className = 'p-4 bg-slate text-center text-slate-400 font-pixel rounded border-2 border-forest';
+        box.innerText = '[ SAMPLE TUBE: UV OFF ]';
+      }
+    }
+
+    function checkSim3Complete() {
+      const wave = document.getElementById('sim3-wave').value;
+      if (Math.abs(wave - 488) <= 25) {
+        completeSim('animal');
+      } else {
+        playSound('click');
+        alert('Adjust UV Wavelength slider closer to 488nm green light peak!');
+      }
+    }
+
+    function checkSim4Complete(suspectNum) {
+      const feedback = document.getElementById('sim4-feedback');
+      if (suspectNum === 2) {
+        feedback.innerText = '✓ Exact DNA Band Match! Suspect #2 identified.';
+        feedback.className = 'text-xs font-bold text-emerald-700 text-center';
+        completeSim('forensic');
+      } else {
+        playSound('click');
+        feedback.innerText = '❌ DNA band mismatch. Compare pattern bars carefully.';
+        feedback.className = 'text-xs font-bold text-clay text-center';
+      }
+    }
+
+    let cleanedSpillsCount = 0;
+    function cleanSpill(btn) {
+      if (btn.disabled) return;
+      btn.disabled = true;
+      btn.className = 'p-3 bg-emerald-700 text-parchment font-pixel rounded border border-forest opacity-80';
+      btn.innerText = '✅ Cleaned (Pseudomonas)';
+      cleanedSpillsCount++;
+      playSound('click');
+
+      const status = document.getElementById('sim5-status');
+      if (cleanedSpillsCount >= 4) {
+        status.innerText = '✓ All 4 Zones Purified!';
+        status.className = 'text-xs font-bold text-emerald-700 text-center';
+        completeSim('bioremediation');
+      } else {
+        status.innerText = `${4 - cleanedSpillsCount} Zones Remaining...`;
+      }
+    }
+
+    function updateSim6() {
+      const filter = document.getElementById('sim6-filter').value;
+      document.getElementById('sim6-filter-val').innerText = filter;
+      const box = document.getElementById('sim6-glow-box');
+      if (Math.abs(filter - 509) <= 20) {
+        box.className = 'p-3 bg-emerald-600 text-parchment font-pixel rounded text-center font-bold shadow';
+        box.innerText = '✨ 509nm EMISSION: 100% GFP PURITY';
+      } else {
+        box.className = 'p-3 bg-slate text-center font-pixel rounded text-slate-400';
+        box.innerText = 'GFP EMISSION: 0% (Dark)';
+      }
+    }
+
+    function checkSim6Complete() {
+      const filter = document.getElementById('sim6-filter').value;
+      if (Math.abs(filter - 509) <= 20) {
+        completeSim('aquatic');
+      } else {
+        playSound('click');
+        alert('Set emission lens to ~509nm to isolate GFP!');
+      }
+    }
+
+    function placeAntibioticDisk() {
+      const target = document.getElementById('sim7-disk-target');
+      const feedback = document.getElementById('sim7-feedback');
+      target.className = 'w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center font-pixel text-[10px] text-forest border-4 border-emerald-400 shadow-xl';
+      target.innerText = '24mm ZONE';
+      feedback.innerText = '✓ Clear 24mm Zone of Inhibition measured! Bacteria susceptible.';
+      feedback.className = 'text-xs font-bold text-emerald-700 text-center mt-2';
+      completeSim('medical');
+    }
+
+    function checkSim8Complete() {
+      const feedback = document.getElementById('sim8-feedback');
+      feedback.innerText = '✓ FDA Biological License Application Approved!';
+      feedback.className = 'text-xs font-bold text-emerald-700 text-center';
+      completeSim('regulatory');
+    }
+
+    function completeSim(branchKey) {
+      if (!state.completedSims.has(branchKey)) {
+        state.completedSims.add(branchKey);
+        saveState();
+        playSound('success');
+        triggerConfetti();
+        renderBranchView();
+      }
+    }
+
+    /* ========================================== */
+    /* COLLEGE TUITION CALCULATOR                 */
+    /* ========================================== */
+    let currentCollegeCalc = { name: 'Rutgers University', instate: 18700, outstate: 39000 };
+
+    function filterColleges(type) {
+      playSound('click');
+      const cards = document.querySelectorAll('.college-card');
+      
+      document.getElementById('cfilter-all').className = 'px-2.5 py-1 bg-sand hover:bg-parchment rounded font-pixel text-slate';
+      document.getElementById('cfilter-low').className = 'px-2.5 py-1 bg-sand hover:bg-parchment rounded font-pixel text-slate';
+      document.getElementById('cfilter-equal').className = 'px-2.5 py-1 bg-sand hover:bg-parchment rounded font-pixel text-slate';
+      document.getElementById(`cfilter-${type}`).className = 'px-2.5 py-1 bg-forest text-parchment rounded font-pixel';
+
+      cards.forEach(card => {
+        const instate = parseInt(card.getAttribute('data-instate'));
+        if (type === 'all') {
+          card.classList.remove('hidden');
+        } else if (type === 'low' && instate < 17000) {
+          card.classList.remove('hidden');
+        } else if (type === 'equal' && (instate === 16370 || instate === 41770)) {
+          card.classList.remove('hidden');
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+    }
+
+    function calcCollegeTuition(name, instate, outstate) {
+      currentCollegeCalc = { name, instate, outstate };
+      document.getElementById('calc-college-name').value = name;
+      updateTuitionCalc();
+      playSound('click');
+      document.getElementById('tuition-calculator-panel').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateTuitionCalc() {
+      const residency = document.getElementById('calc-residency').value;
+      const years = parseInt(document.getElementById('calc-years').value);
+      const rate = residency === 'inState' ? currentCollegeCalc.instate : currentCollegeCalc.outstate;
+      const total = rate * years;
+
+      document.getElementById('calc-result-price').innerText = '$' + total.toLocaleString();
+    }
+
+    function checkBioScholarRequirement() {
+      const checkedCount = document.querySelectorAll('#tab-content-colleges input[type="checkbox"]:checked').length;
+      state.bioScholarReqs = checkedCount;
+      saveState();
+    }
+
+    /* ========================================== */
+    /* CTE GAME PORTAL & EMBED LOGIC              */
+    /* ========================================== */
+    function loadCustomGameUrl() {
+      const input = document.getElementById('custom-game-url-input').value.trim();
+      if (!input) {
+        alert('Please enter a valid URL.');
+        return;
+      }
+
+      const iframe = document.getElementById('external-game-iframe');
+      const builtin = document.getElementById('builtin-game-container');
+      const label = document.getElementById('game-source-label');
+
+      iframe.src = input;
+      iframe.classList.remove('hidden');
+      builtin.classList.add('hidden');
+      label.innerText = 'EXTERNAL EMBED: ' + input;
+
+      state.gameTested = true;
+      saveState();
+      playSound('success');
+    }
+
+    function resetBuiltInGame() {
+      const iframe = document.getElementById('external-game-iframe');
+      const builtin = document.getElementById('builtin-game-container');
+      const label = document.getElementById('game-source-label');
+
+      iframe.src = '';
+      iframe.classList.add('hidden');
+      builtin.classList.remove('hidden');
+      label.innerText = 'BUILT-IN LAB RUNNER DEMO';
+      playSound('click');
+    }
+
+    function reloadGameFrame() {
+      const iframe = document.getElementById('external-game-iframe');
+      if (!iframe.classList.contains('hidden')) {
+        iframe.src = iframe.src;
+      } else {
+        startBuiltInGame();
+      }
+      playSound('click');
+    }
+
+    function toggleGameFullscreen() {
+      const wrapper = document.getElementById('game-frame-wrapper');
+      if (!document.fullscreenElement) {
+        wrapper.requestFullscreen().catch(err => {
+          alert(`Fullscreen error: ${err.message}`);
+        });
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    /* BUILT-IN CANVAS ARCADE MINI-GAME LOGIC */
+    let gameLoopReq = null;
+    let gameScore = 0;
+    let gameActive = false;
+    let playerY = 0;
+    let playerVy = 0;
+    let isJumping = false;
+    let hazards = [];
+
+    function startBuiltInGame() {
+      document.getElementById('builtin-game-overlay').classList.add('hidden');
+      gameActive = true;
+      gameScore = 0;
+      hazards = [];
+      playerY = 0;
+      playerVy = 0;
+
+      state.gameTested = true;
+      saveState();
+      playSound('click');
+
+      const canvas = document.getElementById('builtin-game-canvas');
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+
+      window.removeEventListener('keydown', handleGameJump);
+      window.addEventListener('keydown', handleGameJump);
+      canvas.onclick = handleGameJump;
+
+      runGameLoop();
+    }
+
+    function handleGameJump(e) {
+      if ((e.code === 'Space' || e.code === 'ArrowUp' || e.type === 'click') && !isJumping && gameActive) {
+        playerVy = -12;
+        isJumping = true;
+        playSound('click');
+      }
+    }
+
+    function runGameLoop() {
+      if (!gameActive) return;
+      const canvas = document.getElementById('builtin-game-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const groundY = height - 50;
+
+      // Update Physics
+      playerY += playerVy;
+      playerVy += 0.6; // gravity
+      if (playerY >= 0) {
+        playerY = 0;
+        playerVy = 0;
+        isJumping = false;
+      }
+
+      gameScore++;
+
+      // Spawn hazards
+      if (Math.random() < 0.02 && hazards.length < 3) {
+        hazards.push({ x: width, width: 24, height: 32 });
+      }
+
+      // Update hazards
+      hazards.forEach(h => h.x -= 5);
+      hazards = hazards.filter(h => h.x > -50);
+
+      // Render
+      ctx.fillStyle = '#1e3a29';
+      ctx.fillRect(0, 0, width, height);
+
+      // Draw Floor
+      ctx.fillStyle = '#4a7c59';
+      ctx.fillRect(0, groundY, width, 50);
+
+      // Draw Player (Researcher Sprite)
+      ctx.fillStyle = '#d4af37';
+      ctx.fillRect(80, groundY - 40 + playerY, 28, 40);
+
+      // Draw Hazards (Beakers)
+      ctx.fillStyle = '#b85d38';
+      hazards.forEach(h => {
+        ctx.fillRect(h.x, groundY - h.height, h.width, h.height);
+
+        // Simple Collision Check
+        if (h.x > 70 && h.x < 100 && (groundY - 40 + playerY) > (groundY - h.height - 10)) {
+          gameActive = false;
+          playSound('click');
+          alert(`Game Over! Final Biotech Score: ${gameScore}`);
+          document.getElementById('builtin-game-overlay').classList.remove('hidden');
+        }
+      });
+
+      // HUD Score
+      ctx.fillStyle = '#f7f4ea';
+      ctx.font = '16px "Pixelify Sans"';
+      ctx.fillText(`SCORE: ${gameScore} PTS`, 20, 30);
+
+      if (gameActive) {
+        gameLoopReq = requestAnimationFrame(runGameLoop);
+      }
+    }
+
+    /* ========================================== */
+    /* 2D CANVAS WORLD MAP HUB RENDERER           */
+    /* ========================================== */
+    const islandNodes = [
+      { id: 'microbial', name: 'Microbial Spire', icon: '🦠', x: 0.18, y: 0.28, color: '#4a7c59' },
+      { id: 'agricultural', name: 'Agricultural Isle', icon: '🌱', x: 0.42, y: 0.22, color: '#88a070' },
+      { id: 'animal', name: 'Transgenic Safari', icon: '🐾', x: 0.72, y: 0.26, color: '#b85d38' },
+      { id: 'forensic', name: 'Forensic Reef', icon: '🧬', x: 0.16, y: 0.62, color: '#5c4033' },
+      { id: 'bioremediation', name: 'Bioremediation Haven', icon: '🌊', x: 0.82, y: 0.60, color: '#2a5a68' },
+      { id: 'aquatic', name: 'Aquatic GFP Trench', icon: '🪼', x: 0.32, y: 0.80, color: '#1e3a29' },
+      { id: 'medical', name: 'Medical Citadel', icon: '🩺', x: 0.58, y: 0.78, color: '#b85d38' },
+      { id: 'regulatory', name: 'Regulatory Keep', icon: '⚖️', x: 0.80, y: 0.82, color: '#5c4033' }
+    ];
+
+    let mapAnimationTime = 0;
+
+    function renderMapCanvas() {
+      const canvas = document.getElementById('world-map-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Draw Animated Water Background
+      ctx.fillStyle = '#1b3b48';
+      ctx.fillRect(0, 0, w, h);
+
+      mapAnimationTime += 0.03;
+
+      // Water Ripples
+      ctx.strokeStyle = '#285163';
+      ctx.lineWidth = 1.5;
+      for (let i = 0; i < w; i += 60) {
+        for (let j = 0; j < h; j += 40) {
+          const shift = Math.sin(mapAnimationTime + i) * 4;
+          ctx.beginPath();
+          ctx.moveTo(i + shift, j);
+          ctx.lineTo(i + 20 + shift, j);
+          ctx.stroke();
+        }
+      }
+
+      // Draw Central Hub Island
+      const cx = w * 0.5;
+      const cy = h * 0.48;
+      ctx.fillStyle = '#eae3d2';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = '#1e3a29';
+      ctx.stroke();
+
+      ctx.fillStyle = '#1e3a29';
+      ctx.font = 'bold 12px "Pixelify Sans"';
+      ctx.textAlign = 'center';
+      ctx.fillText('🏰 CTE HUB', cx, cy + 4);
+
+      // Draw Outer 8 Islands
+      islandNodes.forEach(node => {
+        const nx = node.x * w;
+        const ny = node.y * h;
+
+        // Draw Connecting Shipping Route Lines
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#88a070';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Island Land Mass
+        const isVisited = state.visitedIslands.has(node.id);
+        ctx.fillStyle = isVisited ? '#f7f4ea' : '#eae3d2';
+        ctx.beginPath();
+        ctx.ellipse(nx, ny, 36, 28, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.lineWidth = isVisited ? 3 : 2;
+        ctx.strokeStyle = isVisited ? '#d4af37' : '#1e3a29';
+        ctx.stroke();
+
+        // Icon & Label
+        ctx.fillStyle = '#1e3a29';
+        ctx.font = '18px sans-serif';
+        ctx.fillText(node.icon, nx, ny - 2);
+
+        ctx.font = 'bold 10px "Pixelify Sans"';
+        ctx.fillText(node.name.toUpperCase(), nx, ny + 18);
+      });
+
+      // Mouse Hover & Click Detection
+      canvas.onmousemove = (e) => {
+        const cRect = canvas.getBoundingClientRect();
+        const mx = e.clientX - cRect.left;
+        const my = e.clientY - cRect.top;
+        const tooltip = document.getElementById('map-hover-tooltip');
+
+        let hovered = false;
+        islandNodes.forEach(node => {
+          const nx = node.x * w;
+          const ny = node.y * h;
+          const dist = Math.hypot(mx - nx, my - ny);
+
+          if (dist < 36) {
+            hovered = true;
+            tooltip.classList.remove('hidden');
+            tooltip.style.left = `${mx + 12}px`;
+            tooltip.style.top = `${my + 12}px`;
+
+            document.getElementById('tooltip-title').innerText = `${node.icon} ${node.name}`;
+            document.getElementById('tooltip-desc').innerText = branchData[node.id].subtitle;
+            const isV = state.visitedIslands.has(node.id);
+            document.getElementById('tooltip-status').innerText = isV ? 'STATUS: EXPLORED ✓' : 'STATUS: UNEXPLORED';
+          }
+        });
+
+        if (!hovered) {
+          tooltip.classList.add('hidden');
+        }
+      };
+
+      canvas.onclick = (e) => {
+        const cRect = canvas.getBoundingClientRect();
+        const mx = e.clientX - cRect.left;
+        const my = e.clientY - cRect.top;
+
+        islandNodes.forEach(node => {
+          const nx = node.x * w;
+          const ny = node.y * h;
+          const dist = Math.hypot(mx - nx, my - ny);
+          if (dist < 36) {
+            playSound('click');
+            selectBranch(node.id);
+          }
+        });
+      };
+    }
+
+    /* ========================================== */
+    /* BADGES & ACHIEVEMENTS UI SYSTEM            */
+    /* ========================================== */
+    function updateBadgeUI() {
+      // Calculate progress
+      const pIslands = Math.min(8, state.visitedIslands.size);
+      const pColleges = Math.min(4, state.visitedColleges.size);
+      const pSims = Math.min(8, state.completedSims.size);
+      const pGame = state.gameTested ? 1 : 0;
+      const pScholar = Math.min(3, state.bioScholarReqs);
+
+      const counts = {
+        island_pioneer: pIslands,
+        college_scout: pColleges,
+        lab_master: pSims,
+        game_tester: pGame,
+        bio_scholar: pScholar
+      };
+
+      let totalUnlocked = 0;
+      const grid = document.getElementById('badges-container-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      state.badges.forEach(b => {
+        const current = counts[b.id] || 0;
+        const isUnlocked = current >= b.total;
+        if (isUnlocked) totalUnlocked++;
+
+        grid.innerHTML += `
+          <div class="pixel-box p-5 rounded-lg bg-white flex items-start space-x-4 ${isUnlocked ? 'border-2 border-gold shadow-lg' : 'opacity-70'}">
+            <div class="w-14 h-14 bg-sand rounded border-2 border-forest flex items-center justify-center text-3xl shrink-0">
+              ${b.icon}
+            </div>
+            <div class="space-y-1 flex-grow">
+              <div class="flex items-center justify-between">
+                <h3 class="font-pixel text-lg font-bold text-forest">${b.name}</h3>
+                <span class="font-pixel text-xs px-2 py-0.5 rounded ${isUnlocked ? 'bg-gold text-forest font-bold' : 'bg-sand text-slate'}">
+                  ${isUnlocked ? 'UNLOCKED ✓' : `${current}/${b.total}`}
+                </span>
+              </div>
+              <p class="text-xs text-slate">${b.desc}</p>
+            </div>
+          </div>
+        `;
+      });
+
+      // Update HUD & Header Progress Bar
+      const totalBadges = state.badges.length;
+      const pct = Math.round((totalUnlocked / totalBadges) * 100);
+
+      document.getElementById('header-badge-count').innerText = `${totalUnlocked}/${totalBadges} BADGES`;
+      document.getElementById('badge-total-percentage').innerText = `${pct}%`;
+      document.getElementById('badge-progress-bar').style.width = `${pct}%`;
+    }
+
+    function resetAllProgress() {
+      if (confirm('Are you sure you want to reset all earned badges and lab progress?')) {
+        localStorage.removeItem('biotech_cte_state');
+        state.visitedIslands.clear();
+        state.visitedColleges.clear();
+        state.completedSims.clear();
+        state.gameTested = false;
+        state.bioScholarReqs = 0;
+        saveState();
+        playSound('click');
+        location.reload();
+      }
+    }
+
+    /* ========================================== */
+    /* APPLICATION INITIALIZATION                 */
+    /* ========================================== */
+    window.onload = function() {
+      loadSavedState();
+      switchTab('map');
+
+      // Keep map canvas resized properly
+      window.addEventListener('resize', () => {
+        if (state.currentTab === 'map') renderMapCanvas();
+      });
+    };
+  </script>
+</body>
+</html>
