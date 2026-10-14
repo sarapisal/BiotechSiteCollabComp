@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biotech CTE Career & Learning Portal</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Stylesheet Link -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <span>🌿 High School Biotech CTE Career & Pathways Portal</span>
+        <a href="#" id="topLaunchNewTab" onclick="openCurrentSiteNewTab(event)" class="top-link">Open Site in New Tab ↗</a>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo-container" onclick="showSection('hero')">
+            <div class="pixel-icon">🧬</div>
+            <div>
+                <h1 class="logo-text">BIOTECH CTE</h1>
+                <span class="logo-subtext">Career Explorer & Map</span>
+            </div>
+        </div>
+
+        <nav class="nav-links">
+            <button class="nav-btn active" onclick="showSection('map-section')">🗺️ World Map</button>
+            <button class="nav-btn" onclick="showSection('branches-section')">🔬 Biotech Branches</button>
+            <button class="nav-btn" onclick="showSection('colleges-section')">🎓 Top NJ Colleges</button>
+            <button class="nav-btn highlight" onclick="showSection('game-section')">🎮 CTE Game Portal</button>
+            <button class="nav-btn" onclick="showSection('badges-section')">🏆 Badges (<span id="badge-count">0</span>/8)</button>
+        </nav>
+    </header>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="main-container">
+
+        <!-- HERO / INTRO SECTION -->
+        <section id="hero" class="card hero-card">
+            <div class="hero-content">
+                <span class="badge-tag">For NJ High School CTE Students</span>
+                <h2 class="hero-title">Explore Your Future in Biotechnology</h2>
+                <p class="hero-description">
+                    Welcome High School Explorers! Whether you're investigating future college majors, looking for summer internships, or excited to play the Biotech CTE Game, this portal connects real-world bio-science branches directly to your career journey.
+                </p>
+                <div class="hero-actions">
+                    <button class="btn btn-primary" onclick="showSection('map-section')">Explore Island Map 🗺️</button>
+                    <button class="btn btn-secondary" onclick="showSection('game-section')">Launch CTE Game 🎮</button>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="stat-box">
+                    <span class="stat-num">8</span>
+                    <span class="stat-label">Biotech Sectors</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num">4</span>
+                    <span class="stat-label">Top NJ Universities</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-num">100+</span>
+                    <span class="stat-label">Research Facilities</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 1. MAP SECTION -->
+        <section id="map-section" class="section-container active-section">
+            <div class="section-header">
+                <h2>🗺️ Interactive Biotech Archipelago Map</h2>
+                <p>Click on any island below to jump directly to its specialized biotechnology domain and complete interactive lab challenges!</p>
+            </div>
+
+            <div class="map-wrapper">
+                <canvas id="worldMapCanvas" width="1000" height="520"></canvas>
+                <div id="mapTooltip" class="map-tooltip">Hover over an island</div>
+            </div>
+
+            <div class="island-quick-grid">
+                <button class="island-chip" onclick="selectBranch('microbial')">🦠 Microbial</button>
+                <button class="island-chip" onclick="selectBranch('agricultural')">🌾 Agricultural</button>
+                <button class="island-chip" onclick="selectBranch('animal')">🐾 Animal</button>
+                <button class="island-chip" onclick="selectBranch('forensic')">🔍 Forensic</button>
+                <button class="island-chip" onclick="selectBranch('bioremediation')">🌱 Bioremediation</button>
+                <button class="island-chip" onclick="selectBranch('aquatic')">🌊 Aquatic</button>
+                <button class="island-chip" onclick="selectBranch('medical')">🏥 Medical</button>
+                <button class="island-chip" onclick="selectBranch('regulatory')">📋 Regulatory</button>
+            </div>
+        </section>
+
+        <!-- 2. BIOTECH BRANCHES SECTION -->
+        <section id="branches-section" class="section-container">
+            <div class="section-header">
+                <h2>🔬 Biotechnology Branches & Mini-Simulations</h2>
+                <p>Explore high school CTE topic modules, learn key applications, and complete hands-on simulations to earn badges.</p>
+            </div>
+
+            <!-- Branch Navigation Tabs -->
+            <div class="tabs-nav" id="branchTabsNav">
+                <button class="tab-btn active" data-branch="microbial" onclick="selectBranch('microbial')">🦠 Microbial</button>
+                <button class="tab-btn" data-branch="agricultural" onclick="selectBranch('agricultural')">🌾 Agricultural</button>
+                <button class="tab-btn" data-branch="animal" onclick="selectBranch('animal')">🐾 Animal</button>
+                <button class="tab-btn" data-branch="forensic" onclick="selectBranch('forensic')">🔍 Forensic</button>
+                <button class="tab-btn" data-branch="bioremediation" onclick="selectBranch('bioremediation')">🌱 Bioremediation</button>
+                <button class="tab-btn" data-branch="aquatic" onclick="selectBranch('aquatic')">🌊 Aquatic</button>
+                <button class="tab-btn" data-branch="medical" onclick="selectBranch('medical')">🏥 Medical</button>
+                <button class="tab-btn" data-branch="regulatory" onclick="selectBranch('regulatory')">📋 Regulatory</button>
+            </div>
+
+            <!-- TAB CONTENT PANELS -->
+            <div class="branch-card-container">
+
+                <!-- MICROBIAL -->
+                <div id="branch-microbial" class="branch-panel active-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🦠</span>
+                            <div>
+                                <h3>Microbial Biotechnology</h3>
+                                <span class="branch-subtitle">Fermentation, Biomanufacturing & Microorganisms</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-microbial-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Microbial biotechnology uses bacteria, yeast, and fungi to manufacture valuable human products including insulin, enzymes, biofuels, and probiotic foods. High school students entering this field master microbiology, aseptic technique, and fermenter operation.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Aseptic culturing and plate streaking</li>
+                                <li>Bacterial transformation and protein extraction</li>
+                                <li>Bioreactor pH, temperature, and yield optimization</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Bioprocess Technician, Fermentation Scientist, Microbiologist ($55,000 - $95,000/yr).
+                            </div>
+                        </div>
+
+                        <!-- Mini Sim -->
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Bacterial Fermentation Optimization</h4>
+                            <p>Adjust the pH, Temperature, and Nutrient Feed to achieve maximum bacterial protein yield!</p>
+                            
+                            <div class="sim-controls">
+                                <label>Temperature (°C): <span id="tempVal">37</span>°C</label>
+                                <input type="range" id="tempRange" min="20" max="60" value="37" oninput="updateFermentation()">
+
+                                <label>pH Level: <span id="phVal">7.0</span></label>
+                                <input type="range" id="phRange" min="3" max="11" step="0.5" value="7.0" oninput="updateFermentation()">
+
+                                <label>Nutrient Feed Rate: <span id="feedVal">Medium</span></label>
+                                <select id="feedSelect" onchange="updateFermentation()">
+                                    <option value="Low">Low</option>
+                                    <option value="Medium" selected>Medium</option>
+                                    <option value="High">High</option>
+                                </select>
+                            </div>
+
+                            <div class="sim-display">
+                                <div class="yield-bar-bg">
+                                    <div id="yieldBar" class="yield-bar-fill" style="width: 40%;"></div>
+                                </div>
+                                <div class="yield-text">Current Yield: <strong id="yieldScore">40%</strong></div>
+                                <div id="yieldFeedback" class="sim-feedback">Adjust parameters to reach 90%+ yield!</div>
+                            </div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('microbial')">Check Batch & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AGRICULTURAL -->
+                <div id="branch-agricultural" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🌾</span>
+                            <div>
+                                <h3>Agricultural Biotechnology</h3>
+                                <span class="branch-subtitle">Crop Resilience, Genetically Modified Crops & Food Security</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-agricultural-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Agri-biotech enhances crop yields, pest resistance, and drought tolerance through genetic engineering, molecular markers, and tissue culture. Essential for feeding an expanding global population sustainably.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Plant tissue culture micropropagation</li>
+                                <li>CRISPR gene editing in crop strains</li>
+                                <li>Agrobacterium-mediated gene transfer</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Plant Geneticist, Agricultural Biotechnologist, Crop Yield Specialist ($60,000 - $105,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Drought Resistance Gene Splice</h4>
+                            <p>Select and insert the target drought-tolerant gene sequence into the crop plant DNA strain.</p>
+
+                            <div class="gene-puzzle">
+                                <p>Target Vector: <code>ATCG-[ ??? ]-GCTA</code></p>
+                                <div class="gene-options">
+                                    <button class="gene-btn" onclick="tryGeneSplice(false)">Sequence A: TTAA</button>
+                                    <button class="gene-btn" onclick="tryGeneSplice(true)">Sequence B: TAGC</button>
+                                    <button class="gene-btn" onclick="tryGeneSplice(false)">Sequence C: CCGG</button>
+                                </div>
+                                <div id="geneFeedback" class="sim-feedback">Select the correct complementary base-pair sequence!</div>
+                            </div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('agricultural')">Test Crop Yield & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANIMAL -->
+                <div id="branch-animal" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🐾</span>
+                            <div>
+                                <h3>Animal Biotechnology</h3>
+                                <span class="branch-subtitle">Transgenic Models, Livestock Health & GFP Markers</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-animal-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Animal biotech applies genetic engineering and molecular tools to improve livestock breeding, develop disease-resistant species, and produce biomedical animal models that assist in human therapeutic research.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>GFP (Green Fluorescent Protein) marker insertion</li>
+                                <li>ELISA antibody testing in veterinary diagnostics</li>
+                                <li>Selective genomic selection and cloning tech</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Veterinary Biologist, Transgenic Animal Specialist, Embryologist ($58,000 - $110,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Transgenic Fluorescence Filter</h4>
+                            <p>Toggle UV wavelength excitation to detect successful GFP expression in transgenic cell samples!</p>
+
+                            <div class="uv-viewer">
+                                <div id="transgenicCell" class="petri-cell">Cell Sample #B04</div>
+                                <button class="btn btn-secondary" onclick="toggleUV()">Toggle UV Light (395nm)</button>
+                            </div>
+
+                            <div id="uvFeedback" class="sim-feedback">Switch on UV light to confirm fluorescence expression.</div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('animal')">Verify Sample & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FORENSIC -->
+                <div id="branch-forensic" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🔍</span>
+                            <div>
+                                <h3>Forensic Biotechnology</h3>
+                                <span class="branch-subtitle">DNA Fingerprinting, Gel Electrophoresis & STR Analysis</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-forensic-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Forensic biotechnology uses DNA profiling, STR (Short Tandem Repeat) analysis, and gel electrophoresis to solve crimes, identify missing persons, and support legal justice systems.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Polymerase Chain Reaction (PCR) amplification</li>
+                                <li>Agarose gel electrophoresis running & UV illumination</li>
+                                <li>Paternity and forensic DNA ladder interpretation</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Forensic DNA Analyst, Crime Lab Technician, Molecular Analyst ($52,000 - $92,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Gel Electrophoresis DNA Matcher</h4>
+                            <p>Compare the crime scene DNA ladder with Suspect A, B, and C to identify the match.</p>
+
+                            <div class="gel-display">
+                                <div class="gel-lane"><span>Crime Scene:</span> <code class="bands">|| - ||| - |</code></div>
+                                <div class="gel-lane"><span>Suspect A:</span> <code class="bands">| - || - |||</code></div>
+                                <div class="gel-lane"><span>Suspect B:</span> <code class="bands">|| - ||| - |</code></div>
+                                <div class="gel-lane"><span>Suspect C:</span> <code class="bands">||| - | - ||</code></div>
+                            </div>
+
+                            <div class="suspect-picker">
+                                <button class="gene-btn" onclick="matchForensic('A')">Suspect A</button>
+                                <button class="gene-btn" onclick="matchForensic('B')">Suspect B</button>
+                                <button class="gene-btn" onclick="matchForensic('C')">Suspect C</button>
+                            </div>
+                            <div id="forensicFeedback" class="sim-feedback">Select the matching DNA band profile!</div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('forensic')">Submit DNA Report & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BIOREMEDIATION -->
+                <div id="branch-bioremediation" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🌱</span>
+                            <div>
+                                <h3>Bioremediation Biotechnology</h3>
+                                <span class="branch-subtitle">Environmental Cleanup, Microbial Degradation & Phytoremediation</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-bioremediation-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Bioremediation leverages biological organisms—such as oil-degrading bacteria or heavy-metal absorbing plants—to clean up polluted marine and soil environments safely and naturally.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Hydrocarbon-degrading microbe inoculation</li>
+                                <li>Soil biostimulation and bioaugmentation</li>
+                                <li>Phytoremediation heavy-metal tracking</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Environmental Biotechnologist, Eco-Restoration Consultant ($58,000 - $98,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Coastal Oil Spill Cleanup</h4>
+                            <p>Deploy specialized <em>Pseudomonas</em> bacterial cultures to degrade coastal crude oil slicks!</p>
+
+                            <div class="spill-box">
+                                <div id="spillVisual" class="spill-visual oil-dark">Polluted Zone: 100% Oil</div>
+                                <button class="btn btn-secondary" onclick="deployMicrobes()">Inoculate Oil-Eating Microbes 🧫</button>
+                            </div>
+                            <div id="spillFeedback" class="sim-feedback">Inoculate microbes to clean the spill.</div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('bioremediation')">Certify Clean Zone & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AQUATIC -->
+                <div id="branch-aquatic" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🌊</span>
+                            <div>
+                                <h3>Aquatic Biotechnology</h3>
+                                <span class="branch-subtitle">Marine Drugs, Aquaculture & Bioactive Compounds</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-aquatic-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Aquatic/Marine biotech explores deep-sea organisms, microalgae, and marine sponges to discover novelty antibiotics, bio-plastics, and sustainable seafood aquaculture solutions.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Algae photobioreactor cultivation</li>
+                                <li>Marine natural product extraction</li>
+                                <li>Fish disease vaccination in aquaculture</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Marine Biotechnologist, Aquaculture Genetics Manager ($54,000 - $96,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Deep-Sea GFP Bio-Luminescence Extractor</h4>
+                            <p>Harvest glowing proteins from deep-sea jellyfish cultures under optimal pressure conditions.</p>
+
+                            <div class="ocean-sim">
+                                <div id="depthGauge">Depth: 1500m | Pressure: Optimal</div>
+                                <button class="btn btn-secondary" onclick="harvestAquatic()">Extract Marine Enzymes ⚓</button>
+                            </div>
+                            <div id="aquaticFeedback" class="sim-feedback">Extract bioactive compounds at optimal depth.</div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('aquatic')">Store Compound & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MEDICAL -->
+                <div id="branch-medical" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">🏥</span>
+                            <div>
+                                <h3>Medical Biotechnology</h3>
+                                <span class="branch-subtitle">Therapeutics, Antibiotics, Vaccines & Biomedical Research</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-medical-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Medical biotech leads healthcare innovation by developing mRNA vaccines, monoclonal antibodies, gene therapies, and diagnostic kits to combat diseases and antibiotic-resistant bacteria.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Antibiotic Zone of Inhibition disc diffusion assay</li>
+                                <li>Cell culture maintenance & aseptic technique</li>
+                                <li>Diagnostic immunoassay development</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Biomedical Scientist, Clinical Research Coordinator, Pharmaceutical Developer ($68,000 - $130,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: Antibiotic Zone of Inhibition Assay</h4>
+                            <p>Place antibiotic discs on the bacterial lawn to test effective clear zone diameters.</p>
+
+                            <div class="disk-assay">
+                                <div class="plate-graphic">
+                                    <div class="disc disc-1" onclick="checkDisc(1, 'Disc A (Penicillin): 5mm - Resistance')">Disc A</div>
+                                    <div class="disc disc-2" onclick="checkDisc(2, 'Disc B (Novel Biotech Compound): 22mm - Highly Effective!')">Disc B</div>
+                                </div>
+                                <div id="medicalFeedback" class="sim-feedback">Click on Disc A or Disc B to evaluate clear zone effectiveness!</div>
+                            </div>
+
+                            <button class="btn btn-primary full-width" onclick="completeSim('medical')">Submit Assay & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- REGULATORY -->
+                <div id="branch-regulatory" class="branch-panel">
+                    <div class="branch-header">
+                        <div class="branch-title-group">
+                            <span class="branch-icon">📋</span>
+                            <div>
+                                <h3>Regulatory Biotechnology</h3>
+                                <span class="branch-subtitle">FDA Compliance, Quality Assurance (QA/QC) & Ethics</span>
+                            </div>
+                        </div>
+                        <span class="badge-status" id="badge-regulatory-status">🔒 Locked</span>
+                    </div>
+
+                    <div class="branch-grid">
+                        <div class="branch-info">
+                            <h4>Overview & Career Scope</h4>
+                            <p>Regulatory biotechnology ensures that all biotech medical devices, vaccines, and engineered foods are safe, effective, and ethically manufactured according to FDA, EPA, and USDA standards.</p>
+                            
+                            <h4>Key Skills You'll Learn</h4>
+                            <ul>
+                                <li>Good Manufacturing Practice (cGMP) compliance</li>
+                                <li>Clinical trial phase protocol design</li>
+                                <li>FDA 510(k) and IND application documentation</li>
+                            </ul>
+
+                            <div class="career-callout">
+                                <strong>💡 Target Careers:</strong> Regulatory Affairs Specialist, QA/QC Manager, Bioethics Consultant ($70,000 - $135,000/yr).
+                            </div>
+                        </div>
+
+                        <div class="sim-box">
+                            <h4>🧪 Mini-Lab: FDA 5-Phase Approval Sequence</h4>
+                            <p>Put the approval stages in correct chronological order:</p>
+
+                            <div class="approval-flow">
+                                <span>1. Discovery ➔ 2. Preclinical ➔ 3. Clinical Trials ➔ 4. FDA Review ➔ 5. Post-Market</span>
+                            </div>
+                            <button class="btn btn-secondary full-width margin-top" onclick="verifyRegulatory()">Verify Quality Protocol ✅</button>
+                            <div id="regulatoryFeedback" class="sim-feedback">Click verify to validate regulatory compliance.</div>
+
+                            <button class="btn btn-primary full-width margin-top" onclick="completeSim('regulatory')">Approve Product & Claim Badge 🏆</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 3. TOP NJ COLLEGES SECTION -->
+        <section id="colleges-section" class="section-container">
+            <div class="section-header">
+                <h2>🎓 Top Colleges for Biotechnology in New Jersey</h2>
+                <p>Explore tuition rates, campus locations, special programs, and career skill outcomes tailored for high school CTE students.</p>
+            </div>
+
+            <!-- College Filters & Tuition Estimator -->
+            <div class="card college-tools">
+                <div class="tool-group">
+                    <label>Filter by Tuition Level:</label>
+                    <select id="tuitionFilter" onchange="filterColleges()">
+                        <option value="all">All Tuition Ranges</option>
+                        <option value="under20">Under $20,000 In-State</option>
+                        <option value="over20">$20,000+ In-State</option>
+                    </select>
+                </div>
+                <div class="tool-group">
+                    <label>Residency Calculator:</label>
+                    <select id="residencySelect" onchange="filterColleges()">
+                        <option value="inState">NJ In-State Resident</option>
+                        <option value="outOfState">Out-of-State Student</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- College Cards Grid -->
+            <div class="college-grid">
+
+                <!-- Rutgers -->
+                <div class="college-card" data-instate="19400">
+                    <div class="college-badge">Research University</div>
+                    <h3>Rutgers University</h3>
+                    <p class="college-location">📍 New Brunswick, Newark & Camden, NJ</p>
+                    
+                    <div class="tuition-box">
+                        <div class="tuition-item">
+                            <span class="label">In-State Tuition:</span>
+                            <span class="price">$18,000 - $19,400 / yr</span>
+                        </div>
+                        <div class="tuition-item">
+                            <span class="label">Out-of-State Tuition:</span>
+                            <span class="price">$37,000 - $41,000 / yr</span>
+                        </div>
+                    </div>
+
+                    <p class="college-desc">
+                        Rutgers has an exceptional biotechnology program that teaches essential skills like proficiency in using biotechnology tools, reading scientific journals, and working as a collaborative team in a modern laboratory setting.
+                    </p>
+
+                    <div class="college-highlights">
+                        <strong>🌟 Highlights:</strong> Extensive university research labs, biomanufacturing certifications, direct industry recruitment pipeline.
+                    </div>
+                </div>
+
+                <!-- William Paterson -->
+                <div class="college-card" data-instate="8379">
+                    <div class="college-badge accent-badge">Best In-State Value</div>
+                    <h3>William Paterson University</h3>
+                    <p class="college-location">📍 Wayne, NJ</p>
+
+                    <div class="tuition-box">
+                        <div class="tuition-item">
+                            <span class="label">In-State Tuition:</span>
+                            <span class="price highlight-price">$8,379 / yr</span>
+                        </div>
+                        <div class="tuition-item">
+                            <span class="label">Out-of-State Tuition:</span>
+                            <span class="price">$13,692 / yr</span>
+                        </div>
+                    </div>
+
+                    <p class="college-desc">
+                        At William Paterson University, you can complete a 30-credit focused biotechnology sequence that lays a solid foundation for any biotech career. You will master key techniques including gene expression, cell and tissue culture, recombinant DNA technology, and structural biology.
+                    </p>
+
+                    <div class="college-highlights">
+                        <strong>🌟 Highlights:</strong> Highly affordable tuition, hands-on cell culture labs, personalized faculty research mentorship.
+                    </div>
+                </div>
+
+                <!-- Kean University -->
+                <div class="college-card" data-instate="16370">
+                    <div class="college-badge">Industry Network</div>
+                    <h3>Kean University</h3>
+                    <p class="college-location">📍 Union, NJ</p>
+
+                    <div class="tuition-box">
+                        <div class="tuition-item">
+                            <span class="label">In-State Tuition:</span>
+                            <span class="price">$16,370 / yr</span>
+                        </div>
+                        <div class="tuition-item">
+                            <span class="label">Out-of-State Tuition:</span>
+                            <span class="price">$16,370 / yr (Flat Rate)</span>
+                        </div>
+                    </div>
+
+                    <p class="college-desc">
+                        Kean offers an outstanding biotechnology program where students research pressing global challenges like antibiotic resistance, interact directly with successful biotech startup founders, and gain access to internships across 100+ partner research facilities.
+                    </p>
+
+                    <div class="college-highlights">
+                        <strong>🌟 Highlights:</strong> Equal in-state/out-of-state rate, incubator networking, direct biotech startup immersion.
+                    </div>
+                </div>
+
+                <!-- Saint Peter's University -->
+                <div class="college-card" data-instate="41770">
+                    <div class="college-badge">Biomedical Focus</div>
+                    <h3>Saint Peter's University</h3>
+                    <p class="college-location">📍 Jersey City, NJ</p>
+
+                    <div class="tuition-box">
+                        <div class="tuition-item">
+                            <span class="label">In-State Tuition:</span>
+                            <span class="price">$41,770 / yr</span>
+                        </div>
+                        <div class="tuition-item">
+                            <span class="label">Out-of-State Tuition:</span>
+                            <span class="price">$41,770 / yr</span>
+                        </div>
+                    </div>
+
+                    <p class="college-desc">
+                        Saint Peter's focuses on biomedical applications of biotechnology by combining coursework across biological and chemical sciences with clinical internships at notable medical institutions and urban research hubs.
+                    </p>
+
+                    <div class="college-highlights">
+                        <strong>🌟 Highlights:</strong> Proximity to NYC medical centers, pre-med track integration, clinical internships.
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- College Prep Checklist -->
+            <div class="card prep-card">
+                <h3>📋 High School CTE College Readiness Checklist</h3>
+                <div class="checklist-grid">
+                    <label class="check-item"><input type="checkbox"> Complete Biology & Chemistry with lab components</label>
+                    <label class="check-item"><input type="checkbox"> Take CTE Biotechnology or Molecular Biology electives</label>
+                    <label class="check-item"><input type="checkbox"> Maintain a lab notebook documenting aseptic procedures</label>
+                    <label class="check-item"><input type="checkbox"> Apply for summer high school research internships (e.g., Rutgers WSSP)</label>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. GAME PORTAL EMBED CONTAINER -->
+        <section id="game-section" class="section-container">
+            <div class="section-header">
+                <h2>🎮 Biotech CTE Game Portal</h2>
+                <p>Embed your custom Biotech CTE Game below or test your skills in the built-in mini runner!</p>
+            </div>
+
+            <div class="card game-container-card">
+                <!-- Game Embed URL Bar with "Open in New Tab" feature -->
+                <div class="game-url-bar">
+                    <label for="gameUrlInput"><strong>🎮 Game Link:</strong></label>
+                    <input type="text" id="gameUrlInput" placeholder="Paste your custom game URL (e.g., https://my-biotech-game.com)..." value="">
+                    
+                    <!-- LINE OF CODE / BUTTON TO OPEN SITE/GAME IN NEW TAB -->
+                    <button class="btn btn-secondary" onclick="loadGameIframe()">Embed Game 📥</button>
+                    <a id="openNewTabBtn" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary" onclick="openGameInNewTab(event)">
+                        Open Game in New Tab ↗
+                    </a>
+                </div>
+
+                <!-- GAME DISPLAY FRAME -->
+                <div class="game-frame-wrapper">
+                    <!-- Embedded iframe (hidden by default until URL loaded) -->
+                    <iframe id="gameIframe" class="game-iframe hidden" title="Biotech CTE Game" allowfullscreen></iframe>
+
+                    <!-- Built-in Interactive Fallback Game -->
+                    <div id="fallbackGame" class="fallback-game">
+                        <div class="game-overlay-header">
+                            <h3>🧪 Built-in Game: Lab Runner & Biotech Quiz</h3>
+                            <button class="btn btn-small btn-secondary" onclick="resetBuiltInGame()">Restart Game 🔄</button>
+                        </div>
+
+                        <div id="gameCanvasContainer" class="game-canvas-box">
+                            <div class="game-score-display">Score: <span id="gameScore">0</span> | High Score: <span id="gameHighScore">0</span></div>
+                            
+                            <div id="quizQuestionBox" class="quiz-box">
+                                <h4 id="questionText">Press Start to begin the Biotech CTE Challenge!</h4>
+                                <div id="quizAnswers" class="answers-grid">
+                                    <!-- Dynamic answers -->
+                                </div>
+                            </div>
+
+                            <button id="startGameBtn" class="btn btn-primary btn-large" onclick="startBuiltInGame()">Start Lab Runner Challenge 🚀</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Game Controls & Info Bar -->
+                <div class="game-footer-info">
+                    <div class="info-tag">⌨️ <strong>Controls:</strong> Click / Tap options</div>
+                    <div class="info-tag">🎯 <strong>Objective:</strong> Answer CTE biotech questions correctly to power your lab reactor</div>
+                    <div class="info-tag">🔗 <strong>Integration:</strong> Supports itch.io, Construct 3, Unity WebGL, or custom HTML5 games</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. BADGES & ACHIEVEMENTS SECTION -->
+        <section id="badges-section" class="section-container">
+            <div class="section-header">
+                <h2>🏆 Your Biotech CTE Achievements</h2>
+                <p>Earn badges by exploring islands and completing interactive biotech lab simulations!</p>
+            </div>
+
+            <div class="badges-grid" id="badgesGrid">
+                <div class="badge-card" id="badge-card-microbial">
+                    <div class="badge-icon">🧫</div>
+                    <h4>Fermentation Master</h4>
+                    <p>Microbial Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-agricultural">
+                    <div class="badge-icon">🌾</div>
+                    <h4>Gene Splicer</h4>
+                    <p>Agricultural Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-animal">
+                    <div class="badge-icon">🐾</div>
+                    <h4>Fluorescence Analyst</h4>
+                    <p>Animal Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-forensic">
+                    <div class="badge-icon">🔍</div>
+                    <h4>DNA Investigator</h4>
+                    <p>Forensic Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-bioremediation">
+                    <div class="badge-icon">🌱</div>
+                    <h4>Eco Clean Tech</h4>
+                    <p>Bioremediation</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-aquatic">
+                    <div class="badge-icon">🌊</div>
+                    <h4>Marine Bio Explorer</h4>
+                    <p>Aquatic Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-medical">
+                    <div class="badge-icon">💊</div>
+                    <h4>Assay Specialist</h4>
+                    <p>Medical Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+
+                <div class="badge-card" id="badge-card-regulatory">
+                    <div class="badge-icon">📋</div>
+                    <h4>FDA Auditor</h4>
+                    <p>Regulatory Biotech</p>
+                    <span class="badge-tag-status">Locked</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>🌿 <strong>Biotech CTE Career Portal</strong> &bull; Designed for NJ High School Biotechnology Students & Educators</p>
+        <p class="footer-sub">Featuring Rutgers University, William Paterson University, Kean University, and Saint Peter's University programs.</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // State Management
+        const state = {
+            completedBadges: new Set(),
+            selectedBranch: 'microbial',
+            gameScore: 0,
+            gameHighScore: 0
+        };
+
+        // Island Data Coordinates & Details
+        const islands = [
+            { id: 'microbial', name: 'Microbial Isle', x: 200, y: 140, r: 42, color: '#4d7c0f', icon: '🦠', desc: 'Fermentation & Microbes' },
+            { id: 'agricultural', name: 'Agri-Crop Atoll', x: 420, y: 120, r: 45, color: '#15803d', icon: '🌾', desc: 'Crop Resilience & Editing' },
+            { id: 'animal', name: 'Fauna Haven', x: 650, y: 130, r: 40, color: '#b45309', icon: '🐾', desc: 'Transgenics & Health' },
+            { id: 'forensic', name: 'Forensic Key', x: 820, y: 220, r: 38, color: '#78350f', icon: '🔍', desc: 'DNA Fingerprinting' },
+            { id: 'bioremediation', name: 'Eco-Spill Reef', x: 180, y: 350, r: 44, color: '#047857', icon: '🌱', desc: 'Environmental Cleanup' },
+            { id: 'aquatic', name: 'Deep Sea Trench', x: 400, y: 380, r: 46, color: '#0369a1', icon: '🌊', desc: 'Marine Bio-prospecting' },
+            { id: 'medical', name: 'Pharma Isle', x: 620, y: 340, r: 48, color: '#9f1239', icon: '🏥', desc: 'Antibiotics & Diagnostics' },
+            { id: 'regulatory', name: 'FDA Hub', x: 800, y: 390, r: 40, color: '#854d0e', icon: '📋', desc: 'Quality Control & Ethics' }
+        ];
+
+        // Quiz Questions for Fallback Game
+        const quizQuestions = [
+            {
+                q: "Which technique is used to make millions of copies of a specific DNA segment?",
+                answers: ["PCR (Polymerase Chain Reaction)", "Fermentation", "Centrifugation", "Electroporation"],
+                correct: 0
+            },
+            {
+                q: "Which NJ University offers an in-state tuition rate of $8,379 for a 30-credit biotech foundation?",
+                answers: ["Rutgers University", "William Paterson University", "Kean University", "Saint Peter's University"],
+                correct: 1
+            },
+            {
+                q: "GFP (Green Fluorescent Protein) was originally isolated from which organism?",
+                answers: ["Soil bacteria", "Jellyfish (Aequorea victoria)", "Agrobacterium", "Yeast"],
+                correct: 1
+            },
+            {
+                q: "What is the primary role of Regulatory Biotechnology?",
+                answers: ["Synthesize new proteins", "Ensure FDA safety, efficacy, and ethical compliance", "Clean up marine oil spills", "Sequencing plant genomes"],
+                correct: 1
+            }
+        ];
+
+        // DOM Loaded Init
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvasMap();
+            loadProgress();
+            updateBadgeUI();
+        });
+
+        // Navigation Switcher
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-container, .hero-card').forEach(sec => {
+                sec.classList.remove('active-section');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+            const target = document.getElementById(sectionId);
+            if(target) target.classList.add('active-section');
+
+            // Highlight nav button
+            const activeBtn = Array.from(document.querySelectorAll('.nav-btn')).find(btn => 
+                btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(sectionId)
+            );
+            if(activeBtn) activeBtn.classList.add('active');
+
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+        }
+
+        // Branch Switcher
+        function selectBranch(branchId) {
+            state.selectedBranch = branchId;
+            showSection('branches-section');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.branch === branchId);
+            });
+
+            document.querySelectorAll('.branch-panel').forEach(panel => {
+                panel.classList.remove('active-panel');
+            });
+
+            const activePanel = document.getElementById(`branch-${branchId}`);
+            if(activePanel) activePanel.classList.add('active-panel');
+        }
+
+        // --- OPEN IN NEW TAB CODE LOGIC ---
+        // 1. Opens custom provided game URL in a new browser tab
+        function openGameInNewTab(event) {
+            const urlInput = document.getElementById('gameUrlInput').value.trim();
+            if(!urlInput) {
+                alert('Please enter or paste a valid game web address (URL) first!');
+                event.preventDefault();
+                return;
+            }
+
+            let formattedUrl = urlInput;
+            if(!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                formattedUrl = 'https://' + formattedUrl;
+            }
+
+            // Set link href dynamically & open in new tab
+            const newTabBtn = document.getElementById('openNewTabBtn');
+            newTabBtn.href = formattedUrl;
+        }
+
+        // 2. Opens current site in new tab
+        function openCurrentSiteNewTab(event) {
+            event.preventDefault();
+            window.open(window.location.href, '_blank', 'noopener,noreferrer');
+        }
+
+        // Game Embed Iframe Loader
+        function loadGameIframe() {
+            const urlInput = document.getElementById('gameUrlInput').value.trim();
+            const iframe = document.getElementById('gameIframe');
+            const fallback = document.getElementById('fallbackGame');
+
+            if(!urlInput) {
+                alert('Please enter a valid game web link!');
+                return;
+            }
+
+            let formattedUrl = urlInput;
+            if(!formattedUrl.startsWith('http://') && !formattedUrl.startsWith('https://')) {
+                formattedUrl = 'https://' + formattedUrl;
+            }
+
+            iframe.src = formattedUrl;
+            iframe.classList.remove('hidden');
+            fallback.classList.add('hidden');
+        }
+
+        // --- CANVAS MAP ANIMATION ---
+        function initCanvasMap() {
+            const canvas = document.getElementById('worldMapCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let animationFrameId;
+            let time = 0;
+
+            function drawMap() {
+                time += 0.03;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                // Ocean Background Gradient
+                const oceanGrad = ctx.createLinearGradient
