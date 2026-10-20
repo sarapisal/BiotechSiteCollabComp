@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Biotech CTE Archipelago - Botanical Explorer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Retro & Modern Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        fern: '#1a2e05',
+                        deepleaf: '#274e13',
+                        moss: '#3f6212',
+                        sprout: '#4d7c0f',
+                        limeglow: '#a3e635',
+                        bark: '#422006',
+                        clay: '#a16207',
+                        parchment: '#fefce8',
+                        sand: '#fef08a',
+                        softleaf: '#65a30d'
+                    },
+                    fontFamily: {
+                        pixel: ['"Pixelify Sans"', 'cursive'],
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0b253a;
+            color: #fefce8;
+            user-select: none;
+            overflow: hidden;
+            touch-action: none;
+        }
+        .pixel-font {
+            font-family: 'Pixelify Sans', cursive;
+        }
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .parchment-card {
+            background: #fefce8;
+            color: #1a2e05;
+            border: 4px solid #422006;
+            box-shadow: 0 8px 0 #1a2e05, inset -4px -4px 0 #fef08a;
+        }
+        .dark-card {
+            background: #274e13;
+            color: #fefce8;
+            border: 4px solid #4d7c0f;
+            box-shadow: 0 8px 0 #1a2e05, inset -4px -4px 0 #1a2e05;
+        }
+        .pixel-btn {
+            background: #a16207;
+            color: #fefce8;
+            border: 3px solid #a3e635;
+            box-shadow: 0 4px 0 #422006;
+            transition: all 0.1s ease;
+        }
+        .pixel-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #422006;
+        }
+        .pixel-btn-moss {
+            background: #4d7c0f;
+            border-color: #a3e635;
+            box-shadow: 0 4px 0 #1a2e05;
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1a2e05;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4d7c0f;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col justify-between items-center relative overflow-hidden bg-fern">
+
+    <!-- TOP HUD NAV BAR -->
+    <header class="w-full bg-deepleaf/95 border-b-4 border-sprout px-3 py-2 flex justify-between items-center z-20 backdrop-blur-md">
+        <div class="flex items-center space-x-3">
+            <span class="text-limeglow pixel-font text-base sm:text-lg tracking-wider flex items-center gap-1.5 font-bold">
+                🌿 BOTANICAL BIOTECH ARCHIPELAGO
+            </span>
+            <div id="current-island-badge" class="px-2.5 py-1 bg-fern rounded border border-sprout text-xs text-parchment font-mono hidden sm:inline-block">
+                📍 Central Hub
+            </div>
+            <!-- Progress Tracker -->
+            <div class="hidden lg:flex items-center gap-3 bg-fern/90 px-3 py-1 rounded border border-sprout text-xs">
+                <span class="text-limeglow font-bold">PROGRESS:</span>
+                <span id="progress-text" class="pixel-font text-parchment text-sm">0 / 9 Islands Completed</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <button id="btn-audio" onclick="game.toggleAudio()" class="px-2.5 py-1 text-xs bg-fern hover:bg-moss border-2 border-sprout rounded text-limeglow flex items-center gap-1">
+                <span id="audio-icon">🔊</span> SFX: ON
+            </button>
+            <button onclick="game.openWorldMap()" class="pixel-btn px-3 py-1 text-xs rounded flex items-center gap-1 font-bold">
+                📋 Expedition Board
+            </button>
+            <button onclick="game.openCustomizer()" class="pixel-btn pixel-btn-moss px-3 py-1 text-xs rounded flex items-center gap-1 font-bold">
+                👤 Character
+            </button>
+        </div>
+    </header>
+
+    <!-- GAME CANVAS CONTAINER -->
+    <main class="relative w-full flex-1 flex items-center justify-center overflow-hidden">
+        <canvas id="gameCanvas" class="w-full h-full bg-fern shadow-2xl block"></canvas>
+
+        <!-- MINI MAP OVERLAY HUD -->
+        <div class="absolute top-4 right-4 z-10 bg-fern/90 border-2 border-sprout rounded-lg p-1.5 shadow-xl hidden sm:block">
+            <div class="text-[10px] pixel-font text-limeglow text-center mb-1 font-bold">MINI MAP</div>
+            <canvas id="miniMapCanvas" width="110" height="110" class="bg-deepleaf rounded border border-moss block"></canvas>
+        </div>
+
+        <!-- INTERACTION PROMPT -->
+        <div id="interaction-prompt" class="absolute bottom-6 bg-deepleaf/95 border-2 border-limeglow text-parchment px-4 py-2 rounded-lg text-sm sm:text-base font-bold shadow-xl transform transition-all duration-200 translate-y-12 opacity-0 flex items-center gap-2.5 pointer-events-none z-10">
+            <span class="px-2 py-0.5 bg-limeglow text-fern rounded text-xs pixel-font font-extrabold">[E] / TAP</span>
+            <span id="prompt-text">Interact</span>
+        </div>
+    </main>
+
+    <!-- MOBILE TOUCH CONTROLS -->
+    <div id="touch-controls" class="absolute bottom-4 left-4 right-4 flex justify-between items-end pointer-events-none z-20 md:hidden">
+        <div class="grid grid-cols-3 gap-1 w-36 h-36 bg-fern/80 p-2 rounded-full border-2 border-sprout backdrop-blur-xs pointer-events-auto">
+            <div></div>
+            <button ontouchstart="game.setTouchKey('ArrowUp', true)" ontouchend="game.setTouchKey('ArrowUp', false)" class="bg-deepleaf/80 active:bg-moss text-parchment rounded-t-lg border border-sprout flex items-center justify-center text-xl">▲</button>
+            <div></div>
+            <button ontouchstart="game.setTouchKey('ArrowLeft', true)" ontouchend="game.setTouchKey('ArrowLeft', false)" class="bg-deepleaf/80 active:bg-moss text-parchment rounded-l-lg border border-sprout flex items-center justify-center text-xl">◄</button>
+            <div class="bg-fern/40 rounded-full"></div>
+            <button ontouchstart="game.setTouchKey('ArrowRight', true)" ontouchend="game.setTouchKey('ArrowRight', false)" class="bg-deepleaf/80 active:bg-moss text-parchment rounded-r-lg border border-sprout flex items-center justify-center text-xl">►</button>
+            <div></div>
+            <button ontouchstart="game.setTouchKey('ArrowDown', true)" ontouchend="game.setTouchKey('ArrowDown', false)" class="bg-deepleaf/80 active:bg-moss text-parchment rounded-b-lg border border-sprout flex items-center justify-center text-xl">▼</button>
+            <div></div>
+        </div>
+
+        <button id="touch-action-btn" onclick="game.triggerAction()" class="w-16 h-16 bg-clay/90 active:bg-a16207 border-2 border-limeglow rounded-full flex items-center justify-center text-parchment font-bold pixel-font text-xs shadow-lg pointer-events-auto">
+            ACT
+        </button>
+    </div>
+
+    <!-- MODAL: EXPEDITION BOARD WORLD MAP -->
+    <div id="modal-worldmap" class="fixed inset-0 bg-fern/90 backdrop-blur-md z-50 flex items-center justify-center p-2 sm:p-4 hidden">
+        <div class="parchment-card w-full max-w-6xl p-4 sm:p-6 rounded-lg h-[92vh] flex flex-col">
+            <div class="flex justify-between items-center mb-2 border-b-2 border-bark pb-2">
+                <h2 class="pixel-font text-clay text-lg sm:text-2xl font-bold flex items-center gap-2">
+                    📋 EXPANDED BOTANICAL ARCHIPELAGO EXPEDITION BOARD
+                </h2>
+                <button onclick="game.closeModals()" class="text-bark hover:text-clay text-2xl font-bold">✖</button>
+            </div>
+            <p class="text-xs text-fern mb-2 font-semibold">Click on any island on the large expedition board to travel directly there!</p>
+            
+            <div class="relative w-full flex-1 bg-fern rounded-lg border-4 border-bark overflow-hidden flex items-center justify-center">
+                <canvas id="worldMapCanvas" class="w-full h-full block cursor-pointer"></canvas>
+                <!-- MAP TOOLTIP -->
+                <div id="map-tooltip" class="absolute bottom-4 left-4 right-4 bg-deepleaf/95 border-2 border-limeglow p-3 rounded text-parchment hidden pointer-events-none shadow-2xl">
+                    <div class="flex justify-between items-center">
+                        <span id="tooltip-name" class="pixel-font text-limeglow text-base font-bold">Island Name</span>
+                        <span id="tooltip-star" class="text-lg">⭐</span>
+                    </div>
+                    <p id="tooltip-desc" class="text-xs text-parchment/90 mt-1">Description goes here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CHARACTER CUSTOMIZER -->
+    <div id="modal-customizer" class="fixed inset-0 bg-fern/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="parchment-card w-full max-w-3xl p-6 rounded-lg max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 border-b-2 border-bark pb-2">
+                <h2 class="pixel-font text-clay text-base sm:text-lg font-bold">👤 RESEARCHER CUSTOMIZER</h2>
+                <button onclick="game.closeModals()" class="text-bark hover:text-clay text-2xl font-bold">✖</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div class="flex flex-col items-center justify-center bg-sand border-2 border-bark p-4 rounded-lg">
+                    <span class="text-xs font-bold text-bark mb-1 pixel-font">PIXEL AVATAR PREVIEW</span>
+                    <canvas id="customizerCanvas" width="128" height="128" class="bg-fern rounded border-2 border-moss shadow-inner my-2"></canvas>
+                    <span class="text-moss font-bold text-sm mt-1 pixel-font">Biotech CTE Scholar</span>
+                </div>
+
+                <div class="space-y-3 text-xs text-fern font-semibold">
+                    <div>
+                        <label class="block mb-1 font-bold">GENDER / BODY TYPE</label>
+                        <div class="flex gap-2" id="gender-options"></div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">SKIN TONE</label>
+                        <div class="flex gap-1.5 flex-wrap" id="skin-options"></div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">HAIRSTYLE</label>
+                        <select id="hair-style-select" class="w-full bg-parchment border-2 border-bark rounded p-1.5" onchange="game.updateAvatarFromUI()"></select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">HAIR COLOR</label>
+                        <div class="flex gap-1.5 flex-wrap" id="hair-color-options"></div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">OUTFIT</label>
+                        <select id="outfit-style-select" class="w-full bg-parchment border-2 border-bark rounded p-1.5" onchange="game.updateAvatarFromUI()"></select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">ACCESSORY</label>
+                        <select id="accessory-select" class="w-full bg-parchment border-2 border-bark rounded p-1.5" onchange="game.updateAvatarFromUI()"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="game.closeModals()" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">
+                    SAVE & CONTINUE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: INFO / BUILDING INTERIOR LIBRARY -->
+    <div id="modal-library" class="fixed inset-0 bg-fern/90 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="parchment-card w-full max-w-2xl p-6 rounded-lg max-h-[88vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b-2 border-bark pb-2">
+                <h2 id="library-title" class="pixel-font text-clay text-base sm:text-lg font-bold">📖 BUILDING RECORDS</h2>
+                <button onclick="game.closeModals()" class="text-bark hover:text-clay text-2xl font-bold">✖</button>
+            </div>
+            
+            <div id="library-content" class="flex-1 overflow-y-auto space-y-3 pr-2 text-fern text-sm"></div>
+
+            <div class="mt-4 pt-3 border-t-2 border-bark flex justify-end">
+                <button onclick="game.closeModals()" class="pixel-btn px-4 py-1 text-xs rounded">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: WHITEBOARD MINI-GAME ARENA -->
+    <div id="modal-gameroom" class="fixed inset-0 bg-fern/95 backdrop-blur-md z-50 flex items-center justify-center p-3 hidden">
+        <div class="dark-card w-full max-w-3xl p-5 rounded-lg flex flex-col max-h-[95vh] overflow-hidden">
+            <div class="flex justify-between items-center mb-3 border-b-2 border-sprout pb-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-2xl">📋</span>
+                    <h2 id="gameroom-title" class="pixel-font text-limeglow text-sm sm:text-base">RESEARCH WHITEBOARD MINI-GAME</h2>
+                </div>
+                <button onclick="game.closeModals()" class="text-sprout hover:text-parchment text-2xl font-bold">✖</button>
+            </div>
+
+            <div id="gameroom-body" class="flex-1 bg-fern rounded-lg p-4 border-2 border-moss flex flex-col items-center justify-center overflow-y-auto min-h-[360px]"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: FINAL GRAND AWARD -->
+    <div id="modal-award" class="fixed inset-0 bg-fern/95 backdrop-blur-lg z-50 flex items-center justify-center p-4 hidden">
+        <div class="parchment-card w-full max-w-2xl p-8 rounded-xl text-center space-y-4 border-4 border-limeglow">
+            <div class="text-5xl">🏆</div>
+            <h2 class="pixel-font text-clay text-2xl font-bold">BOTANICAL BIOTECH MASTER AWARD</h2>
+            <p class="text-fern text-sm font-semibold">
+                Congratulations! You have mastered every branch of Biotechnology, explored all island research labs, and solved each whiteboard challenge across the botanical archipelago.
+            </p>
+            <div class="bg-sand p-4 rounded-lg border-2 border-bark text-fern font-bold text-xs space-y-1">
+                <p>🎓 Certified in Agricultural, Animal, Forensic, Bioremediation, Aquatic, Medical, & Regulatory Biotech</p>
+                <p>💼 Dual-Enrollment Ready for New Jersey Life Sciences Programs</p>
+            </div>
+            <button onclick="game.closeModals()" class="pixel-btn px-6 py-2 rounded text-sm font-bold">
+                RETURN TO HUB
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const TILE_SIZE = 32;
+        const MAP_SIZE = 80; // EXPANDED EXPEDITION WORLD MAP (80x80)
+
+        // Character Customization Options
+        const GENDERS = [
+            { id: 'masc', label: 'Masculine' },
+            { id: 'fem', label: 'Feminine' },
+            { id: 'neutral', label: 'Neutral' }
+        ];
+
+        const SKIN_TONES = [
+            '#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5a3825', '#3c2012', '#e5b88f'
+        ];
+
+        const HAIR_STYLES = [
+            { id: 'short', name: 'Short Cut' },
+            { id: 'long', name: 'Long Flowing' },
+            { id: 'curly', name: 'Curly Afro' },
+            { id: 'ponytail', name: 'High Ponytail' },
+            { id: 'bob', name: 'Sleek Bob' },
+            { id: 'spiky', name: 'Spiky Top' },
+            { id: 'dreads', name: 'Dreadlocks' },
+            { id: 'buns', name: 'Double Buns' }
+        ];
+
+        const HAIR_COLORS = [
+            '#1a2e05', '#422006', '#a16207', '#a3e635', '#fefce8', '#4d7c0f', '#2563eb', '#ec4899'
+        ];
+
+        const OUTFITS = [
+            { id: 'labcoat', name: 'Botanist Lab Coat', color: '#fefce8', trim: '#a16207' },
+            { id: 'fieldvest', name: 'Expedition Field Vest', color: '#422006', trim: '#a3e635' },
+            { id: 'biosuit', name: 'Bio Hazmat Suit', color: '#a3e635', trim: '#1a2e05' },
+            { id: 'techhoodie', name: 'Fern Tech Hoodie', color: '#274e13', trim: '#65a30d' }
+        ];
+
+        const ACCESSORIES = [
+            { id: 'none', name: 'None' },
+            { id: 'goggles', name: 'Botanical Goggles' },
+            { id: 'visor', name: 'Cyber AR Visor' },
+            { id: 'glasses', name: 'Scientist Glasses' }
+        ];
+
+        // BOTANICAL ARCHIPELAGO ISLANDS DATA WITH EXPANDED BUILDINGS & NPCS
+        const ISLANDS_DATA = {
+            hub: {
+                id: 'hub',
+                name: 'Central Botanical Hub',
+                isHub: true,
+                desc: 'Main Botanical Quad with orientation signs, Dr. Aris, assistant guides, and Expedition Board.',
+                color: '#4d7c0f',
+                mapX: 0.5, mapY: 0.5,
+                npc: { name: 'Dr. Aris', title: 'Lead Bio-Specialist', icon: '👨‍🔬', color: '#a3e635' },
+                stations: [
+                    { id: 'sign_controls', title: 'Sign: Game Controls', x: 36, y: 38, type: 'sign', icon: '🪧', info: '<h3 class="text-xl font-bold text-clay">Game Movement & Controls</h3><p>• Use [WASD] or Arrow Keys to move your character around.<br>• Press [E] or tap the ACT button near stations, signs, or NPCs to interact.<br>• Tap "Expedition Board" to sail between islands.</p>' },
+                    { id: 'sign_custom', title: 'Sign: Customizer Info', x: 44, y: 38, type: 'sign', icon: '🪧', info: '<h3 class="text-xl font-bold text-clay">Character Customization</h3><p>• Tap the "Character" button in the top menu to change gender, hair, skin tone, outfits, and lab accessories at any time!</p>' },
+                    { id: 'npc_aris', title: 'Dr. Aris (Lead Botanist)', x: 40, y: 34, type: 'npc', icon: '👨‍🔬', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Aris</h3><p>“Welcome to our expanded Botanical Biotech Archipelago! Walk up to the <b>Expedition Board</b> to travel across all surrounding islands. Complete every whiteboard challenge and return to me for your Master Award!”</p>' },
+                    { id: 'npc_assistant', title: 'Guide Maya', x: 32, y: 42, type: 'npc', icon: '👩‍🌾', isNPC: true, npcInfo: { color: '#65a30d' }, info: '<h3 class="text-xl font-bold text-clay">Guide Maya</h3><p>“Need help navigating? Check the Mini-Map in the top corner to spot buildings, path junctions, and nearby research stations!”</p>' },
+                    { id: 'map_terminal', title: 'Botanical Expedition Board', x: 40, y: 46, type: 'map', icon: '📋', isMapTerminal: true },
+                    { id: 'building_quad', title: 'Central Plant Science Hall', x: 28, y: 28, type: 'building', style: 'hall' },
+                    { id: 'building_hub_lib', title: 'Botanical Archives Library', x: 48, y: 28, type: 'building', style: 'library' },
+                    { id: 'building_greenhouse', title: 'Central Dome Greenhouse', x: 38, y: 20, type: 'building', style: 'greenhouse' },
+                    // Uninteractable decorative houses of varied models
+                    { id: 'decor_house_1', title: 'Gardener Cottage', x: 20, y: 20, type: 'decor_house', style: 'cottage' },
+                    { id: 'decor_house_2', title: 'Bio-Greenhouse Storage', x: 58, y: 20, type: 'decor_house', style: 'vault' },
+                    { id: 'decor_house_3', title: 'Seed Vault Cottage', x: 20, y: 56, type: 'decor_house', style: 'cottage' },
+                    { id: 'decor_house_4', title: 'Research Dormitory', x: 58, y: 56, type: 'decor_house', style: 'dorm' }
+                ]
+            },
+            microbial: {
+                id: 'microbial',
+                name: 'Microbial Isle',
+                desc: 'Fermentation bioprocessing, mushroom spore forests, & bioreactors.',
+                color: '#3f6212',
+                mapX: 0.2, mapY: 0.2,
+                npc: { name: 'Dr. Zymos', title: 'Fermentation Specialist', icon: '🧪', color: '#65a30d' },
+                stations: [
+                    { id: 'building_lab', title: 'Fermentation Lab', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Fermentation & Industrial Microbe Lab</h3><p>Microorganisms act as cellular factories to yield insulin, bio-ethanol, enzymes, and antibiotics through controlled fermentation.</p><br><p><b>NJ College Pathway:</b> Rutgers University Biomanufacturing Track ($15,000/yr).</p>' },
+                    { id: 'building_lib', title: 'Aseptic Library', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Aseptic Cleanroom Library</h3><p>Learn ISO Class 5 cleanroom standards, sterilization techniques, and HEPA air balance protocols required in biomanufacturing.</p>' },
+                    { id: 'sign_micro_1', title: 'Sign: Microbe Safety', x: 38, y: 42, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Cleanroom Protocols</h3><p>Always sterilize bio-reactors to prevent fungal strain contamination during fermentation runs.</p>' },
+                    { id: 'npc_micro', title: 'Dr. Zymos', x: 40, y: 34, type: 'npc', icon: '🧪', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Zymos - Fermentation Specialist</h3><p>“Microbes produce over 70% of modern biopharmaceuticals! Search our research buildings to find the hidden whiteboard game.”</p>' },
+                    { id: 'npc_assistant_micro', title: 'Tech Liam', x: 52, y: 34, type: 'npc', icon: '🥼', isNPC: true, npcInfo: { color: '#a3e635' }, info: '<h3 class="text-xl font-bold text-clay">Tech Liam</h3><p>“We monitor bioreactor pH and temperature 24/7 to maximize cell yield!”</p>' },
+                    { id: 'decor_house_1', title: 'Culture Storage', x: 18, y: 18, type: 'decor_house', style: 'vault' },
+                    { id: 'decor_house_2', title: 'Spore Nursery', x: 58, y: 58, type: 'decor_house', style: 'greenhouse' }
+                ]
+            },
+            agricultural: {
+                id: 'agricultural',
+                name: 'Agricultural Isle',
+                desc: 'CRISPR gene-edited crop greenhouses & climate bio-domes.',
+                color: '#4d7c0f',
+                mapX: 0.5, mapY: 0.16,
+                npc: { name: 'Dr. Flora', title: 'Agri-Genetics Specialist', icon: '👩‍🌾', color: '#a3e635' },
+                stations: [
+                    { id: 'building_lab', title: 'CRISPR Greenhouse', x: 28, y: 30, type: 'building', style: 'greenhouse', info: '<h3 class="text-xl font-bold text-clay">Greenhouse Agri-Tech Center</h3><p>Using CRISPR gene editing to develop drought-tolerant, disease-resistant crops without chemical pesticides.</p><br><p><b>Career Outlook:</b> Agri-Genetics Specialist ($65,000–$115,000/yr).</p>' },
+                    { id: 'building_lib', title: 'Crop Genetics Center', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Soil & Hydroponics Archive</h3><p>Vertical farming and precision hydroponics reduce water consumption by 95% while maximizing urban yield.</p>' },
+                    { id: 'sign_agri_1', title: 'Sign: Vertical Farming', x: 36, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Hydroponic Precision</h3><p>Recirculating nutrient solutions enable year-round crop growth inside climate-controlled domes.</p>' },
+                    { id: 'npc_agri', title: 'Dr. Flora', x: 40, y: 34, type: 'npc', icon: '👩‍🌾', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Flora - Crop Geneticist</h3><p>“CRISPR editing allows us to safeguard food crops against climate extremes. Test your gene matching skills on our whiteboard!”</p>' },
+                    { id: 'npc_agri_2', title: 'Agronomist Kai', x: 22, y: 34, type: 'npc', icon: '🌾', isNPC: true, npcInfo: { color: '#a16207' }, info: '<h3 class="text-xl font-bold text-clay">Agronomist Kai</h3><p>“Gene-edited crops can double harvest yields while using half as much water!”</p>' },
+                    { id: 'decor_house_1', title: 'Tool Shed', x: 20, y: 20, type: 'decor_house', style: 'cottage' },
+                    { id: 'decor_house_2', title: 'Crop Storehouse', x: 56, y: 56, type: 'decor_house', style: 'vault' }
+                ]
+            },
+            animal: {
+                id: 'animal',
+                name: 'Animal Isle',
+                desc: 'Genetics sanctuary, livestock breeding, & veterinary biotech.',
+                color: '#a16207',
+                mapX: 0.8, mapY: 0.2,
+                npc: { name: 'Dr. Fauna', title: 'Veterinary Bio-Researcher', icon: '👨‍⚕️', color: '#a16207' },
+                stations: [
+                    { id: 'building_lab', title: 'Veterinary Bio-Lab', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Veterinary Science Building</h3><p>Utilizing antibody ELISA diagnostic tests and PCR sequencing to safeguard livestock and pets from viral disease.</p>' },
+                    { id: 'building_lib', title: 'Genomics Sanctuary', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Selective Breeding & Conservation Library</h3><p>Studying therapeutic protein production in animal systems and endangered species conservation genetics.</p>' },
+                    { id: 'sign_animal_1', title: 'Sign: Vet Diagnostics', x: 38, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">ELISA Assays</h3><p>Enzyme-linked immunosorbent assays identify livestock antibodies in under two hours.</p>' },
+                    { id: 'npc_animal', title: 'Dr. Fauna', x: 40, y: 34, type: 'npc', icon: '👨‍⚕️', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Fauna - Animal Bio-Researcher</h3><p>“Animal biotech drives groundbreaking diagnostic tests and conservation efforts! Find the whiteboard inside one of our facilities.”</p>' },
+                    { id: 'decor_house_1', title: 'Feed Barn', x: 18, y: 18, type: 'decor_house', style: 'cottage' },
+                    { id: 'decor_house_2', title: 'Vet Clinic Cottage', x: 58, y: 58, type: 'decor_house', style: 'dorm' }
+                ]
+            },
+            forensic: {
+                id: 'forensic',
+                name: 'Forensic Isle',
+                desc: 'High-tech crime scene lab & STR DNA sequencers.',
+                color: '#1a2e05',
+                mapX: 0.18, mapY: 0.5,
+                npc: { name: 'Det. Helix', title: 'Forensic Geneticist', icon: '🕵️‍♂️', color: '#65a30d' },
+                stations: [
+                    { id: 'building_lab', title: 'Forensic DNA Lab', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Forensic STR Profiling Center</h3><p>Analyzing Short Tandem Repeat (STR) genetic markers to identify suspect evidence at crime scenes.</p>' },
+                    { id: 'building_lib', title: 'Toxicology Vault', x: 48, y: 30, type: 'building', style: 'vault', info: '<h3 class="text-xl font-bold text-clay">Toxicology Vault</h3><p>Mass spectrometry and chromatography used to detect foreign trace toxins and chemical compounds.</p>' },
+                    { id: 'sign_forensic_1', title: 'Sign: Chain of Custody', x: 38, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Evidence Logging</h3><p>Strict chain-of-custody protocols ensure evidence remains untampered for courtroom presentations.</p>' },
+                    { id: 'npc_forensic', title: 'Det. Helix', x: 40, y: 34, type: 'npc', icon: '🕵️‍♂️', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Det. Helix - Forensic Analyst</h3><p>“DNA evidence is the ultimate gold standard in modern forensics! Match the DNA gel bands on our hidden whiteboard.”</p>' },
+                    { id: 'decor_house_1', title: 'Evidence Archive', x: 20, y: 20, type: 'decor_house', style: 'cottage' }
+                ]
+            },
+            bioremediation: {
+                id: 'bioremediation',
+                name: 'Bioremediation Isle',
+                desc: 'Oil spill cleanup base & microbial water purification plants.',
+                color: '#3f6212',
+                mapX: 0.82, mapY: 0.5,
+                npc: { name: 'Dr. Eco', title: 'Environmental Microbiologist', icon: '🥽', color: '#a3e635' },
+                stations: [
+                    { id: 'building_lab', title: 'Eco Cleanup Complex', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Hydrocarbon Cleanup Station</h3><p>Deploying oil-eating bacteria (Pseudomonas) to digest toxic spills into non-toxic water and CO2.</p>' },
+                    { id: 'building_lib', title: 'Plastic Bio-Lab', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Plastic Degradation Library</h3><p>Engineered PETase enzymes capable of breaking down consumer plastics in days instead of centuries.</p>' },
+                    { id: 'sign_bio_1', title: 'Sign: Bio-Filtration', x: 36, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Microbial Scrubbing</h3><p>Bio-filter beds utilize living bacterial mats to strip heavy metals from industrial runoff water.</p>' },
+                    { id: 'npc_bio', title: 'Dr. Eco', x: 40, y: 34, type: 'npc', icon: '🥽', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Eco - Environmental Specialist</h3><p>“Engineered microbes can eat oil spills and digest oceanic plastic waste! Check our whiteboards to spray microbes.”</p>' },
+                    { id: 'decor_house_1', title: 'Water Pump Station', x: 56, y: 20, type: 'decor_house', style: 'vault' }
+                ]
+            },
+            aquatic: {
+                id: 'aquatic',
+                name: 'Aquatic Isle',
+                desc: 'Coral reef protection center, marine vessel, & algae farms.',
+                color: '#274e13',
+                mapX: 0.2, mapY: 0.82,
+                npc: { name: 'Capt. Marina', title: 'Marine Biotech Director', icon: '👩‍✈️', color: '#65a30d' },
+                stations: [
+                    { id: 'building_lab', title: 'Marine Discovery Station', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Marine Bio-Discovery Center</h3><p>Extracting bio-active pharmaceuticals from ocean sponges and cultivating high-yield micro-algae biofuels.</p>' },
+                    { id: 'building_lib', title: 'Coral Research Center', x: 48, y: 30, type: 'building', style: 'greenhouse', info: '<h3 class="text-xl font-bold text-clay">Coral Resilience Library</h3><p>Selective breeding of heat-tolerant micro-algae endosymbionts to protect reefs from ocean warming.</p>' },
+                    { id: 'sign_aqua_1', title: 'Sign: Algae Biofuel', x: 38, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Algae Energy Density</h3><p>Micro-algae produce up to 10 times more bio-oil per acre than terrestrial corn or soy crops.</p>' },
+                    { id: 'npc_aquatic', title: 'Capt. Marina', x: 40, y: 34, type: 'npc', icon: '👩‍✈️', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Capt. Marina - Marine Director</h3><p>“The oceans hold infinite potential for renewable energy and medicines. Balance the salinity hydrometer on our whiteboard!”</p>' },
+                    { id: 'decor_house_1', title: 'Diving Locker', x: 20, y: 56, type: 'decor_house', style: 'cottage' }
+                ]
+            },
+            medical: {
+                id: 'medical',
+                name: 'Medical Isle',
+                desc: 'Hospital clinic, mRNA therapeutics, & gene therapy dome.',
+                color: '#a16207',
+                mapX: 0.5, mapY: 0.84,
+                npc: { name: 'Dr. Vector', title: 'Gene Therapy Specialist', icon: '👩‍⚕️', color: '#a16207' },
+                stations: [
+                    { id: 'building_lab', title: 'Gene Therapeutics Hospital', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Medical Bio-Therapeutics Clinic</h3><p>Engineering synthetic mRNA vaccines, monoclonal antibodies, and targeted CRISPR gene therapies.</p>' },
+                    { id: 'building_lib', title: 'Nanoparticle Vault', x: 48, y: 30, type: 'building', style: 'vault', info: '<h3 class="text-xl font-bold text-clay">Drug Delivery Systems Library</h3><p>Encapsulating fragile genetic instructions inside lipid nanoparticles for targeted cellular delivery.</p>' },
+                    { id: 'sign_med_1', title: 'Sign: mRNA Delivery', x: 38, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Lipid Nanoparticles</h3><p>Protective lipid bubbles shield fragile mRNA molecules until they reach recipient target cells.</p>' },
+                    { id: 'npc_medical', title: 'Dr. Vector', x: 40, y: 34, type: 'npc', icon: '👩‍⚕️', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dr. Vector - Medical Geneticist</h3><p>“Targeted mRNA and CRISPR therapies are revolutionizing disease prevention. Search for our whiteboard target challenge!”</p>' },
+                    { id: 'decor_house_1', title: 'Clinic Supply Depot', x: 58, y: 56, type: 'decor_house', style: 'dorm' }
+                ]
+            },
+            regulatory: {
+                id: 'regulatory',
+                name: 'Regulatory Isle',
+                desc: 'Bio-ethics court, FDA & EPA safety compliance bureau.',
+                color: '#1a2e05',
+                mapX: 0.8, mapY: 0.82,
+                npc: { name: 'Judge Vane', title: 'FDA Compliance Officer', icon: '⚖️', color: '#65a30d' },
+                stations: [
+                    { id: 'building_lab', title: 'FDA Compliance Bureau', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">Regulatory & Safety Bureau</h3><p>Ensures biotech products strictly adhere to FDA, EPA, and USDA safety standards before commercial launch.</p>' },
+                    { id: 'building_lib', title: 'Bioethics Office', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Patent Law & Ethics Library</h3><p>Exploring human gene editing ethics, patient consent, and biotech intellectual property law.</p>' },
+                    { id: 'sign_reg_1', title: 'Sign: Phase Trials', x: 36, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">Clinical Trial Phases</h3><p>New therapeutics undergo Phase I, II, and III clinical trials over several years to ensure safety.</p>' },
+                    { id: 'npc_reg', title: 'Judge Vane', x: 40, y: 34, type: 'npc', icon: '⚖️', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Judge Vane - Regulatory Officer</h3><p>“No biotech discovery reaches the market without strict bioethics approval! Sort regulations on our whiteboard.”</p>' },
+                    { id: 'decor_house_1', title: 'Records Vault', x: 56, y: 20, type: 'decor_house', style: 'vault' }
+                ]
+            },
+            college: {
+                id: 'college',
+                name: 'NJ College Isle',
+                desc: 'NJ University Quad: Rutgers, WPU, Kean, and St. Peter’s.',
+                color: '#4d7c0f',
+                mapX: 0.5, mapY: 0.35,
+                npc: { name: 'Dean Scholar', title: 'Higher Ed Advisor', icon: '🎓', color: '#a3e635' },
+                stations: [
+                    { id: 'building_lab', title: 'NJ Higher Ed Center', x: 28, y: 30, type: 'building', style: 'hall', info: '<h3 class="text-xl font-bold text-clay">NJ Life Science Universities</h3><p>New Jersey is a global biopharma hub! Explore undergraduate CTE degree pathways at Rutgers, Kean, WPU, and St. Peter’s.</p>' },
+                    { id: 'building_lib', title: 'Financial Aid Office', x: 48, y: 30, type: 'building', style: 'library', info: '<h3 class="text-xl font-bold text-clay">Tuition Savings & STEM Grants</h3><p>Earn up to 15 transferable high school dual-enrollment credits to slash college tuition costs!</p>' },
+                    { id: 'sign_college_1', title: 'Sign: Dual Enrollment', x: 38, y: 44, type: 'sign', info: '<h3 class="text-xl font-bold text-clay">High School Credit Transfer</h3><p>Earn high school and college credits simultaneously to shave off an entire semester of tuition!</p>' },
+                    { id: 'npc_college', title: 'Dean Scholar', x: 40, y: 34, type: 'npc', icon: '🎓', isNPC: true, info: '<h3 class="text-xl font-bold text-clay">Dean Scholar - Academic Advisor</h3><p>“NJ dual-enrollment programs save students thousands in tuition! Calculate your credit savings on our whiteboard.”</p>' },
+                    { id: 'decor_house_1', title: 'Student Quad Cottage', x: 20, y: 56, type: 'decor_house', style: 'dorm' }
+                ]
+            }
+        };
+
+        /* SOUND EFFECTS */
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playBeep(freq = 440, duration = 0.1) {
+                if (!this.enabled) return;
+                this.init();
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + duration);
+                } catch(e) {}
+            }
+            playFanfare() {
+                this.playBeep(440, 0.15);
+                setTimeout(() => this.playBeep(554.37, 0.15), 150);
+                setTimeout(() => this.playBeep(659.25, 0.15), 300);
+                setTimeout(() => this.playBeep(880, 0.4), 450);
+            }
+        }
+
+        /* MAIN GAME ENGINE */
+        class GameEngine {
+            constructor() {
+                this.canvas = document.getElementById('gameCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.sfx = new SoundFX();
+
+                this.currentIsland = 'hub';
+                this.completedIslands = new Set();
+
+                this.keys = {};
+                this.nearInteraction = null;
+                this.animTick = 0; // Animation tick counter
+
+                // Player Character State
+                this.avatar = {
+                    gender: 'masc',
+                    skin: 1,
+                    hairStyle: 'short',
+                    hairColor: 0,
+                    outfit: 0,
+                    accessory: 'goggles',
+                    x: 40 * TILE_SIZE,
+                    y: 40 * TILE_SIZE,
+                    speed: 5.2,
+                    facing: 'down',
+                    isMoving: false,
+                    frame: 0
+                };
+
+                this.particles = [];
+                this.decorations = [];
+                this.islandShape = []; // Per-island natural coastline grid
+                this.initCanvasSize();
+                this.bindEvents();
+                this.initCustomizerUI();
+                this.loadIsland('hub');
+
+                this.lastTime = performance.now();
+                requestAnimationFrame((t) => this.loop(t));
+            }
+
+            loop(timestamp) {
+                const dt = (timestamp - this.lastTime) / 1000;
+                this.lastTime = timestamp;
+
+                this.update(dt);
+                this.draw();
+
+                requestAnimationFrame((t) => this.loop(t));
+            }
+
+            initCanvasSize() {
+                this.canvas.width = this.canvas.parentElement.clientWidth;
+                this.canvas.height = this.canvas.parentElement.clientHeight;
+            }
+
+            bindEvents() {
+                window.addEventListener('resize', () => this.initCanvasSize());
+                window.addEventListener('keydown', (e) => {
+                    this.keys[e.key] = true;
+                    if (e.key.toLowerCase() === 'e' || e.key === ' ') {
+                        this.triggerAction();
+                    }
+                });
+                window.addEventListener('keyup', (e) => {
+                    this.keys[e.key] = false;
+                });
+            }
+
+            setTouchKey(key, isPressed) {
+                this.keys[key] = isPressed;
+            }
+
+            toggleAudio() {
+                this.sfx.enabled = !this.sfx.enabled;
+                document.getElementById('audio-icon').innerText = this.sfx.enabled ? '🔊' : '🔇';
+            }
+
+            loadIsland(islandId) {
+                this.currentIsland = islandId;
+                const data = ISLANDS_DATA[islandId];
+                document.getElementById('current-island-badge').innerText = `📍 ${data.name}`;
+
+                this.avatar.x = 40 * TILE_SIZE;
+                this.avatar.y = 40 * TILE_SIZE;
+
+                // GENERATE NATURAL ORGANIC ISLAND SHAPE (0: deep water, 1: shallow water, 2: sand beach, 3: inland grass)
+                this.islandShape = Array(MAP_SIZE).fill(0).map(() => Array(MAP_SIZE).fill(0));
+                const center = MAP_SIZE / 2;
+                const seed = islandId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+
+                for (let r = 0; r < MAP_SIZE; r++) {
+                    for (let c = 0; c < MAP_SIZE; c++) {
+                        const dist = Math.hypot(r - center, c - center);
+                        const angle = Math.atan2(r - center, c - center);
+
+                        // Organic noise simulation with trigonometric waves & per-island seed bias
+                        const wave1 = Math.sin(angle * 5 + seed) * 7;
+                        const wave2 = Math.cos(angle * 9 + seed * 2) * 4;
+                        const wave3 = Math.sin(angle * 13) * 2;
+                        const radiusNoise = wave1 + wave2 + wave3;
+
+                        const islandRadius = 26 + radiusNoise;
+
+                        if (dist < islandRadius - 4) {
+                            this.islandShape[r][c] = 3; // Inland Grass / Turf
+                        } else if (dist < islandRadius) {
+                            this.islandShape[r][c] = 2; // Sandy Beach Coastline
+                        } else if (dist < islandRadius + 3) {
+                            this.islandShape[r][c] = 1; // Shallow Animated Surf Water
+                        } else {
+                            this.islandShape[r][c] = 0; // Deep Ocean Water
+                        }
+                    }
+                }
+
+                // RANDOMIZE WHITEBOARD LOCATION
+                if (islandId !== 'hub') {
+                    data.stations = data.stations.filter(s => !s.isGame);
+                    const whiteboardSpots = [
+                        { x: 30, y: 52 },
+                        { x: 52, y: 52 },
+                        { x: 40, y: 20 }
+                    ];
+                    const chosenSpot = whiteboardSpots[Math.floor(Math.random() * whiteboardSpots.length)];
+                    data.stations.push({
+                        id: 'whiteboard_' + islandId,
+                        title: 'Whiteboard Mini-Game',
+                        x: chosenSpot.x,
+                        y: chosenSpot.y,
+                        type: 'whiteboard',
+                        icon: '📋',
+                        isGame: true
+                    });
+                }
+
+                // Generate island decorations (palm trees on beaches, oaks/pines/flowers inland)
+                this.decorations = [];
+                for (let i = 0; i < 260; i++) {
+                    const rx = Math.floor(Math.random() * (MAP_SIZE - 12) + 6);
+                    const ry = Math.floor(Math.random() * (MAP_SIZE - 12) + 6);
+                    const tileType = this.islandShape[ry][rx];
+
+                    if (tileType === 2) { // Beach
+                        this.decorations.push({
+                            x: rx * TILE_SIZE,
+                            y: ry * TILE_SIZE,
+                            type: Math.random() > 0.4 ? 'palm_tree' : 'seashell'
+                        });
+                    } else if (tileType === 3) { // Inland
+                        this.decorations.push({
+                            x: rx * TILE_SIZE,
+                            y: ry * TILE_SIZE,
+                            type: ['oak_tree', 'pine_tree', 'birch_tree', 'flower_red', 'flower_blue', 'flower_yellow', 'bio_shroom', 'rock', 'bush'][Math.floor(Math.random() * 9)]
+                        });
+                    }
+                }
+
+                // Floating spores, seagulls, & bio-bubbles
+                this.particles = [];
+                for (let i = 0; i < 70; i++) {
+                    this.particles.push({
+                        x: Math.random() * MAP_SIZE * TILE_SIZE,
+                        y: Math.random() * MAP_SIZE * TILE_SIZE,
+                        size: Math.random() * 3 + 1,
+                        speedX: (Math.random() - 0.5) * 0.8,
+                        speedY: Math.random() * 0.5 + 0.2
+                    });
+                }
+
+                this.sfx.playBeep(600, 0.1);
+            }
+
+            markIslandCompleted(islandId) {
+                if (islandId === 'hub') return;
+                this.completedIslands.add(islandId);
+                document.getElementById('progress-text').innerText = `${this.completedIslands.size} / 9 Islands Completed`;
+
+                if (window.confetti) {
+                    confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+                }
+                this.sfx.playFanfare();
+
+                if (this.completedIslands.size >= 9) {
+                    setTimeout(() => {
+                        this.openLibrary({
+                            title: '🌟 BOTANICAL ARCHIPELAGO MASTERED!',
+                            info: '<h3 class="text-xl font-bold text-clay">Return to Central Hub</h3><p>You have completed every island! Return to <b>Central Hub</b> and speak with <b>Dr. Aris</b> to receive your final Master Award.</p>'
+                        });
+                    }, 1000);
+                }
+            }
+
+            update(dt) {
+                this.animTick += 0.05; // Animation timer
+
+                let dx = 0;
+                let dy = 0;
+
+                if (this.keys['ArrowUp'] || this.keys['w'] || this.keys['W']) dy -= 1;
+                if (this.keys['ArrowDown'] || this.keys['s'] || this.keys['S']) dy += 1;
+                if (this.keys['ArrowLeft'] || this.keys['a'] || this.keys['A']) dx -= 1;
+                if (this.keys['ArrowRight'] || this.keys['d'] || this.keys['D']) dx += 1;
+
+                this.avatar.isMoving = dx !== 0 || dy !== 0;
+
+                if (this.avatar.isMoving) {
+                    const length = Math.hypot(dx, dy);
+                    dx /= length;
+                    dy /= length;
+
+                    if (dy < 0) this.avatar.facing = 'up';
+                    else if (dy > 0) this.avatar.facing = 'down';
+                    else if (dx < 0) this.avatar.facing = 'left';
+                    else if (dx > 0) this.avatar.facing = 'right';
+
+                    const newX = this.avatar.x + dx * this.avatar.speed;
+                    const newY = this.avatar.y + dy * this.avatar.speed;
+
+                    // Collision checking against ocean tiles (Prevent walking off island into ocean)
+                    const tileX = Math.floor((newX + TILE_SIZE / 2) / TILE_SIZE);
+                    const tileY = Math.floor((newY + TILE_SIZE / 2) / TILE_SIZE);
+
+                    if (tileX >= 0 && tileX < MAP_SIZE && tileY >= 0 && tileY < MAP_SIZE) {
+                        const tileVal = this.islandShape[tileY][tileX];
+                        if (tileVal >= 2) { // Allow movement on Beach (2) and Grass (3)
+                            this.avatar.x = newX;
+                            this.avatar.y = newY;
+                        }
+                    }
+
+                    this.avatar.frame += 0.25;
+                }
+
+                this.particles.forEach(p => {
+                    p.x += p.speedX;
+                    p.y += p.speedY;
+                    if (p.y > MAP_SIZE * TILE_SIZE) p.y = 0;
+                    if (p.x > MAP_SIZE * TILE_SIZE) p.x = 0;
+                    if (p.x < 0) p.x = MAP_SIZE * TILE_SIZE;
+                });
+
+                this.checkInteractions();
+            }
+
+            checkInteractions() {
+                this.nearInteraction = null;
+                const data = ISLANDS_DATA[this.currentIsland];
+                const pCenterX = this.avatar.x + TILE_SIZE / 2;
+                const pCenterY = this.avatar.y + TILE_SIZE / 2;
+
+                for (let s of data.stations) {
+                    if (s.type === 'decor_house') continue; // Skip non-interactable decorative houses
+
+                    const sCenterX = s.x * TILE_SIZE + TILE_SIZE;
+                    const sCenterY = s.y * TILE_SIZE + TILE_SIZE;
+                    const dist = Math.hypot(pCenterX - sCenterX, pCenterY - sCenterY);
+
+                    if (dist < TILE_SIZE * 2.8) {
+                        this.nearInteraction = s;
+                        this.showPrompt(`Inspect ${s.title}`);
+                        return;
+                    }
+                }
+
+                this.hidePrompt();
+            }
+
+            showPrompt(text) {
+                const el = document.getElementById('interaction-prompt');
+                document.getElementById('prompt-text').innerText = text;
+                el.classList.remove('translate-y-12', 'opacity-0');
+            }
+
+            hidePrompt() {
+                const el = document.getElementById('interaction-prompt');
+                el.classList.add('translate-y-12', 'opacity-0');
+            }
+
+            triggerAction() {
+                if (!this.nearInteraction) return;
+
+                this.sfx.playBeep(500, 0.08);
+
+                if (this.nearInteraction.isMapTerminal) {
+                    this.openWorldMap();
+                } else if (this.nearInteraction.isGame) {
+                    this.openGameRoom();
+                } else if (this.nearInteraction.isNPC && this.currentIsland === 'hub' && this.completedIslands.size >= 9) {
+                    document.getElementById('modal-award').classList.remove('hidden');
+                    if (window.confetti) confetti({ particleCount: 200, spread: 100 });
+                } else {
+                    this.openLibrary(this.nearInteraction);
+                }
+            }
+
+            /* RENDERING ENGINE */
+            draw() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                const cameraX = this.canvas.width / 2 - (this.avatar.x + TILE_SIZE / 2);
+                const cameraY = this.canvas.height / 2 - (this.avatar.y + TILE_SIZE / 2);
+
+                this.ctx.save();
+                this.ctx.translate(cameraX, cameraY);
+
+                // Organic Island Terrain & Wave Animations
+                this.drawTerrain();
+
+                // Path Networks
+                this.drawPathways();
+
+                // Botanical Decor & Beach Palms
+                this.drawDecorations();
+
+                // Buildings & Interactive Stations
+                this.drawStations();
+
+                // Animated Player Character
+                this.drawPixelCharacter(this.ctx, this.avatar.x, this.avatar.y, this.avatar, TILE_SIZE);
+
+                // Floating Spore Particles
+                this.drawParticles();
+
+                this.ctx.restore();
+
+                // Render HUD Mini Map
+                this.drawMiniMap();
+            }
+
+            drawTerrain() {
+                const isl = ISLANDS_DATA[this.currentIsland];
+
+                // Deep Ocean Background
+                this.ctx.fillStyle = '#0b253a';
+                this.ctx.fillRect(-800, -800, MAP_SIZE * TILE_SIZE + 1600, MAP_SIZE * TILE_SIZE + 1600);
+
+                const wavePulse = Math.sin(this.animTick * 1.8) * 4;
+
+                // Render Grid Tiles with Island Shape
+                for (let r = 0; r < MAP_SIZE; r++) {
+                    for (let c = 0; c < MAP_SIZE; c++) {
+                        const type = this.islandShape[r][c];
+                        const x = c * TILE_SIZE;
+                        const y = r * TILE_SIZE;
+
+                        if (type === 1) { // Animated Surf / Waves
+                            this.ctx.fillStyle = '#1e4d6d';
+                            this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                            this.ctx.beginPath();
+                            this.ctx.arc(x + TILE_SIZE / 2, y + TILE_SIZE / 2, Math.max(2, 6 + wavePulse / 2), 0, Math.PI * 2);
+                            this.ctx.fill();
+                        } else if (type === 2) { // Sandy Beach
+                            this.ctx.fillStyle = '#f0e3b6';
+                            this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                            this.ctx.fillStyle = '#e2cf92';
+                            this.ctx.fillRect(x + 4, y + 4, 3, 3);
+                            this.ctx.fillRect(x + 18, y + 20, 2, 2);
+                        } else if (type === 3) { // Inland Grass
+                            this.ctx.fillStyle = isl.color;
+                            this.ctx.fillRect(x, y, TILE_SIZE, TILE_SIZE);
+                        }
+                    }
+                }
+            }
+
+            drawPathways() {
+                // Wooden Boardwalks & Cobblestone Roads
+                this.ctx.fillStyle = '#422006';
+                this.ctx.fillRect(12 * TILE_SIZE, 38 * TILE_SIZE, 56 * TILE_SIZE, 4 * TILE_SIZE);
+                this.ctx.fillRect(38 * TILE_SIZE, 12 * TILE_SIZE, 4 * TILE_SIZE, 56 * TILE_SIZE);
+
+                // Wooden Boardwalk Planks
+                this.ctx.fillStyle = '#a16207';
+                for (let x = 12; x < 68; x += 2) {
+                    this.ctx.fillRect(x * TILE_SIZE, 38 * TILE_SIZE + 2, 4, 4 * TILE_SIZE - 4);
+                    this.ctx.fillRect(38 * TILE_SIZE + 2, x * TILE_SIZE, 4 * TILE_SIZE - 4, 4);
+                }
+            }
+
+            drawDecorations() {
+                const windSway = Math.sin(this.animTick * 1.5) * 3;
+
+                for (let d of this.decorations) {
+                    if (d.type === 'palm_tree') {
+                        // Tropical Beach Palm Tree
+                        this.ctx.fillStyle = '#8c501e';
+                        this.ctx.fillRect(d.x + 13, d.y + 12, 6, 18);
+                        this.ctx.fillStyle = '#3a8c28';
+                        this.ctx.beginPath();
+                        this.ctx.ellipse(d.x + 16 + windSway, d.y + 8, 18, 8, Math.PI / 4, 0, Math.PI * 2);
+                        this.ctx.ellipse(d.x + 16 - windSway, d.y + 8, 18, 8, -Math.PI / 4, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (d.type === 'seashell') {
+                        this.ctx.fillStyle = '#fefce8';
+                        this.ctx.beginPath();
+                        this.ctx.arc(d.x + 8, d.y + 8, 4, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (d.type === 'oak_tree') {
+                        this.ctx.fillStyle = '#422006';
+                        this.ctx.fillRect(d.x + 12, d.y + 18, 8, 14);
+                        this.ctx.fillStyle = '#274e13';
+                        this.ctx.fillRect(d.x - 2 + windSway, d.y, 36, 20);
+                        this.ctx.fillStyle = '#3f6212';
+                        this.ctx.fillRect(d.x + 2 + windSway, d.y + 4, 28, 12);
+                    } else if (d.type === 'pine_tree') {
+                        this.ctx.fillStyle = '#422006';
+                        this.ctx.fillRect(d.x + 14, d.y + 20, 4, 12);
+                        this.ctx.fillStyle = '#1a2e05';
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(d.x + 16 + windSway, d.y);
+                        this.ctx.lineTo(d.x - 2, d.y + 22);
+                        this.ctx.lineTo(d.x + 34, d.y + 22);
+                        this.ctx.fill();
+                    } else if (d.type === 'birch_tree') {
+                        this.ctx.fillStyle = '#fefce8';
+                        this.ctx.fillRect(d.x + 13, d.y + 16, 6, 16);
+                        this.ctx.fillStyle = '#1a2e05';
+                        this.ctx.fillRect(d.x + 14, d.y + 20, 4, 2);
+                        this.ctx.fillStyle = '#65a30d';
+                        this.ctx.beginPath();
+                        this.ctx.arc(d.x + 16 + windSway, d.y + 10, 16, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (d.type === 'bush') {
+                        this.ctx.fillStyle = '#4d7c0f';
+                        this.ctx.beginPath();
+                        this.ctx.arc(d.x + 12, d.y + 12, 10, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    } else if (d.type === 'bio_shroom') {
+                        const pulse = (Math.sin(this.animTick * 3) + 1) * 2;
+                        this.ctx.fillStyle = '#fefce8';
+                        this.ctx.fillRect(d.x + 12, d.y + 18, 8, 10);
+                        this.ctx.fillStyle = '#a3e635';
+                        this.ctx.fillRect(d.x + 6 - (pulse / 2), d.y + 8, 20 + pulse, 10);
+                    } else if (d.type.startsWith('flower')) {
+                        let color = '#a16207';
+                        if (d.type === 'flower_blue') color = '#2563eb';
+                        if (d.type === 'flower_yellow') color = '#fef08a';
+
+                        this.ctx.fillStyle = color;
+                        this.ctx.fillRect(d.x + 8, d.y + 8, 8, 8);
+                        this.ctx.fillStyle = '#a3e635';
+                        this.ctx.fillRect(d.x + 10, d.y + 10, 4, 4);
+                    }
+                }
+            }
+
+            drawStations() {
+                const data = ISLANDS_DATA[this.currentIsland];
+
+                for (let s of data.stations) {
+                    const x = s.x * TILE_SIZE;
+                    const y = s.y * TILE_SIZE;
+
+                    if (s.type === 'building' || s.type === 'decor_house') {
+                        this.drawVariedBuilding(x, y, s);
+
+                        if (s.type === 'building') {
+                            this.ctx.fillStyle = '#fefce8';
+                            this.ctx.font = 'bold 11px "Pixelify Sans"';
+                            this.ctx.textAlign = 'center';
+                            this.ctx.fillText(s.title, x + TILE_SIZE * 1.5, y - 20);
+                        }
+                    } else if (s.type === 'sign') {
+                        this.ctx.fillStyle = '#422006';
+                        this.ctx.fillRect(x + 13, y + 14, 6, 18);
+                        this.ctx.fillStyle = '#a16207';
+                        this.ctx.fillRect(x - 4, y, 40, 20);
+                        this.ctx.strokeStyle = '#422006';
+                        this.ctx.lineWidth = 2;
+                        this.ctx.strokeRect(x - 4, y, 40, 20);
+
+                        this.ctx.fillStyle = '#fefce8';
+                        this.ctx.font = 'bold 9px "Pixelify Sans"';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('🪧 SIGN', x + 16, y + 13);
+                    } else if (s.type === 'npc') {
+                        const npcStyle = s.npcInfo || data.npc || { color: '#a3e635' };
+                        this.drawPixelNPC(this.ctx, x, y, npcStyle);
+                        this.ctx.fillStyle = '#a3e635';
+                        this.ctx.font = 'bold 11px "Pixelify Sans"';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText(s.title, x + 16, y - 8);
+                    } else if (s.type === 'whiteboard') {
+                        this.ctx.fillStyle = '#fefce8';
+                        this.ctx.fillRect(x, y, TILE_SIZE * 2, TILE_SIZE * 1.5);
+                        this.ctx.strokeStyle = '#422006';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.strokeRect(x, y, TILE_SIZE * 2, TILE_SIZE * 1.5);
+
+                        this.ctx.fillStyle = '#1a2e05';
+                        this.ctx.font = 'bold 11px "Pixelify Sans"';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('📋 WHITEBOARD', x + TILE_SIZE, y + 18);
+                        this.ctx.fillText('MINI-GAME', x + TILE_SIZE, y + 32);
+                    } else if (s.type === 'map') {
+                        this.ctx.fillStyle = '#422006';
+                        this.ctx.fillRect(x + 4, y + 16, 8, 24);
+                        this.ctx.fillRect(x + 20, y + 16, 8, 24);
+                        this.ctx.fillStyle = '#fef08a';
+                        this.ctx.fillRect(x - 12, y - 12, 56, 32);
+                        this.ctx.strokeStyle = '#a16207';
+                        this.ctx.lineWidth = 3;
+                        this.ctx.strokeRect(x - 12, y - 12, 56, 32);
+
+                        this.ctx.fillStyle = '#1a2e05';
+                        this.ctx.font = 'bold 10px "Pixelify Sans"';
+                        this.ctx.textAlign = 'center';
+                        this.ctx.fillText('📋 EXPEDITION', x + 16, y + 2);
+                        this.ctx.fillText('BOARD', x + 16, y + 14);
+                    }
+                }
+            }
+
+            drawVariedBuilding(x, y, s) {
+                const style = s.style || 'hall';
+
+                if (style === 'greenhouse') {
+                    // Glass Bio-Dome Greenhouse with animated glowing plants inside
+                    this.ctx.fillStyle = '#65a30d';
+                    this.ctx.fillRect(x, y + 10, TILE_SIZE * 3, TILE_SIZE * 2);
+                    this.ctx.fillStyle = '#a3e635';
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + TILE_SIZE * 1.5, y + 14, TILE_SIZE * 1.5, Math.PI, 0);
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#1a2e05';
+                    this.ctx.lineWidth = 2;
+                    this.ctx.stroke();
+                } else if (style === 'library') {
+                    // Stone Column Library
+                    this.ctx.fillStyle = '#fefce8';
+                    this.ctx.fillRect(x, y + 12, TILE_SIZE * 3, TILE_SIZE * 2);
+                    this.ctx.fillStyle = '#a16207';
+                    this.ctx.fillRect(x - 4, y, TILE_SIZE * 3 + 8, 14);
+                    this.ctx.fillStyle = '#422006';
+                    this.ctx.fillRect(x + 6, y + 12, 6, 40);
+                    this.ctx.fillRect(x + TILE_SIZE * 1.5 - 3, y + 12, 6, 40);
+                    this.ctx.fillRect(x + TILE_SIZE * 3 - 12, y + 12, 6, 40);
+                } else if (style === 'vault') {
+                    // Heavy Steel Bio-Vault
+                    this.ctx.fillStyle = '#274e13';
+                    this.ctx.fillRect(x, y + 16, TILE_SIZE * 3, TILE_SIZE * 2);
+                    this.ctx.fillStyle = '#1a2e05';
+                    this.ctx.fillRect(x + 4, y + 4, TILE_SIZE * 3 - 8, 12);
+                    this.ctx.fillStyle = '#a3e635';
+                    this.ctx.fillRect(x + TILE_SIZE * 1.25, y + 30, 16, 20);
+                } else if (style === 'cottage') {
+                    // Thatched Beach Bungalow Cottage
+                    this.ctx.fillStyle = '#8c501e';
+                    this.ctx.fillRect(x, y + 16, TILE_SIZE * 2.5, TILE_SIZE * 1.8);
+                    this.ctx.fillStyle = '#f0e3b6'; // Thatched Roof
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - 6, y + 16);
+                    this.ctx.lineTo(x + TILE_SIZE * 1.25, y - 8);
+                    this.ctx.lineTo(x + TILE_SIZE * 2.5 + 6, y + 16);
+                    this.ctx.fill();
+                    this.ctx.fillStyle = '#2563eb'; // Circular Window
+                    this.ctx.beginPath();
+                    this.ctx.arc(x + 16, y + 26, 6, 0, Math.PI * 2);
+                    this.ctx.fill();
+                } else if (style === 'dorm') {
+                    // Multi-Story Student Quad Dormitory
+                    this.ctx.fillStyle = '#a16207';
+                    this.ctx.fillRect(x, y, TILE_SIZE * 3.5, TILE_SIZE * 3);
+                    this.ctx.fillStyle = '#422006';
+                    this.ctx.fillRect(x - 4, y - 6, TILE_SIZE * 3.5 + 8, 10);
+                    // Windows Grid
+                    this.ctx.fillStyle = '#fef08a';
+                    for (let wx = 8; wx < TILE_SIZE * 3; wx += 20) {
+                        this.ctx.fillRect(x + wx, y + 12, 10, 12);
+                        this.ctx.fillRect(x + wx, y + 32, 10, 12);
+                        this.ctx.fillRect(x + wx, y + 52, 10, 12);
+                    }
+                } else {
+                    // Standard Research Hall
+                    this.ctx.fillStyle = '#422006';
+                    this.ctx.fillRect(x, y + 16, TILE_SIZE * 3, TILE_SIZE * 2);
+                    this.ctx.fillStyle = s.type === 'decor_house' ? '#3f6212' : '#a16207';
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x - 8, y + 16);
+                    this.ctx.lineTo(x + (TILE_SIZE * 1.5), y - 14);
+                    this.ctx.lineTo(x + TILE_SIZE * 3 + 8, y + 16);
+                    this.ctx.fill();
+
+                    this.ctx.fillStyle = '#a3e635';
+                    this.ctx.fillRect(x + 12, y + 24, 16, 16);
+                    this.ctx.fillRect(x + TILE_SIZE * 2 - 4, y + 24, 16, 16);
+                    this.ctx.fillStyle = '#1a2e05';
+                    this.ctx.fillRect(x + TILE_SIZE * 1.25, y + 36, 16, 28);
+                }
+            }
+
+            drawPixelNPC(ctx, x, y, npcInfo) {
+                ctx.save();
+                ctx.translate(x, y);
+
+                // Idle NPC Breathing / Bouncing Animation
+                const bounceY = Math.sin(this.animTick * 2) * 2;
+
+                ctx.fillStyle = npcInfo.color || '#a3e635';
+                ctx.fillRect(8, 14 + bounceY, 16, 12);
+                ctx.fillStyle = '#fefce8';
+                ctx.fillRect(14, 14 + bounceY, 4, 12);
+
+                // Legs
+                ctx.fillStyle = '#1a2e05';
+                ctx.fillRect(10, 26, 4, 6);
+                ctx.fillRect(18, 26, 4, 6);
+
+                // Head
+                ctx.fillStyle = '#f1c27d';
+                ctx.fillRect(8, 4 + bounceY, 16, 11);
+
+                // Animated Eye Blinking
+                const isBlinking = Math.sin(this.animTick * 0.8) > 0.95;
+                ctx.fillStyle = '#1a2e05';
+                if (isBlinking) {
+                    ctx.fillRect(10, 8 + bounceY, 5, 1);
+                    ctx.fillRect(17, 8 + bounceY, 5, 1);
+                } else {
+                    ctx.fillRect(10, 7 + bounceY, 5, 4);
+                    ctx.fillRect(17, 7 + bounceY, 5, 4);
+                }
+
+                // Hair / Cap
+                ctx.fillStyle = '#422006';
+                ctx.fillRect(7, 1 + bounceY, 18, 5);
+
+                ctx.restore();
+            }
+
+            drawParticles() {
+                this.ctx.fillStyle = '#a3e635';
+                this.particles.forEach(p => {
+                    this.ctx.fillRect(p.x, p.y, p.size, p.size);
+                });
+            }
+
+            drawMiniMap() {
+                const mCanvas = document.getElementById('miniMapCanvas');
+                if (!mCanvas) return;
+                const mCtx = mCanvas.getContext('2d');
+                mCtx.clearRect(0, 0, 110, 110);
+
+                const scale = 110 / (MAP_SIZE * TILE_SIZE);
+
+                // Render island shape on mini-map
+                for (let r = 0; r < MAP_SIZE; r += 2) {
+                    for (let c = 0; c < MAP_SIZE; c += 2) {
+                        const type = this.islandShape[r][c];
+                        if (type === 0) mCtx.fillStyle = '#0b253a';
+                        else if (type === 1) mCtx.fillStyle = '#1e4d6d';
+                        else if (type === 2) mCtx.fillStyle = '#f0e3b6';
+                        else mCtx.fillStyle = '#3f6212';
+
+                        mCtx.fillRect(c * TILE_SIZE * scale, r * TILE_SIZE * scale, 3, 3);
+                    }
+                }
+
+                // Mini map buildings
+                const data = ISLANDS_DATA[this.currentIsland];
+                mCtx.fillStyle = '#a16207';
+                data.stations.forEach(s => {
+                    mCtx.fillRect(s.x * TILE_SIZE * scale, s.y * TILE_SIZE * scale, 5, 5);
+                });
+
+                // Player Blip
+                mCtx.fillStyle = '#a3e635';
+                mCtx.beginPath();
+                mCtx.arc(this.avatar.x * scale, this.avatar.y * scale, 3.5, 0, Math.PI * 2);
+                mCtx.fill();
+            }
+
+            drawPixelCharacter(ctx, x, y, cfg, size = 32) {
+                const skinColor = SKIN_TONES[cfg.skin] || SKIN_TONES[0];
+                const hairColor = HAIR_COLORS[cfg.hairColor] || HAIR_COLORS[0];
+                const outfit = OUTFITS[cfg.outfit] || OUTFITS[0];
+
+                ctx.save();
+                ctx.translate(x, y);
+
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath();
+                ctx.ellipse(size / 2, size - 2, size / 3, 4, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Walking Bob Cycle
+                const walkBob = cfg.isMoving ? Math.abs(Math.sin(cfg.frame * 2)) * 3 : Math.sin(this.animTick) * 1;
+
+                // Body & Outfit
+                ctx.fillStyle = outfit.color;
+                ctx.fillRect(8, 14 - walkBob, 16, 12);
+                ctx.fillStyle = outfit.trim;
+                ctx.fillRect(14, 14 - walkBob, 4, 12);
+
+                // Animated Walking Legs
+                ctx.fillStyle = '#1a2e05';
+                const legAnim = cfg.isMoving ? Math.sin(cfg.frame * 3) * 4 : 0;
+                ctx.fillRect(10 + legAnim, 26, 4, 6);
+                ctx.fillRect(18 - legAnim, 26, 4, 6);
+
+                // Head
+                ctx.fillStyle = skinColor;
+                ctx.fillRect(8, 4 - walkBob, 16, 11);
+
+                // Eyes with Directional Facing
+                ctx.fillStyle = '#1a2e05';
+                if (cfg.facing === 'left') {
+                    ctx.fillRect(9, 8 - walkBob, 2, 3);
+                    ctx.fillRect(15, 8 - walkBob, 2, 3);
+                } else if (cfg.facing === 'right') {
+                    ctx.fillRect(13, 8 - walkBob, 2, 3);
+                    ctx.fillRect(19, 8 - walkBob, 2, 3);
+                } else if (cfg.facing === 'down') {
+                    ctx.fillRect(11, 8 - walkBob, 2, 3);
+                    ctx.fillRect(19, 8 - walkBob, 2, 3);
+                }
+
+                // Hairstyles
+                ctx.fillStyle = hairColor;
+                if (cfg.hairStyle === 'long') {
+                    ctx.fillRect(6, 2 - walkBob, 20, 6);
+                    ctx.fillRect(6, 8 - walkBob, 4, 10);
+                    ctx.fillRect(22, 8 - walkBob, 4, 10);
+                } else if (cfg.hairStyle === 'curly') {
+                    ctx.beginPath();
+                    ctx.arc(16, 6 - walkBob, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (cfg.hairStyle === 'ponytail') {
+                    ctx.fillRect(7, 2 - walkBob, 18, 5);
+                    ctx.fillRect(22, 4 - walkBob, 6, 10);
+                } else {
+                    ctx.fillRect(7, 2 - walkBob, 18, 5);
+                }
+
+                ctx.restore();
+            }
+
+            closeModals() {
+                document.querySelectorAll('#modal-worldmap, #modal-customizer, #modal-library, #modal-gameroom, #modal-award').forEach(el => el.classList.add('hidden'));
+            }
+
+            openWorldMap() {
+                this.closeModals();
+                document.getElementById('modal-worldmap').classList.remove('hidden');
+
+                setTimeout(() => {
+                    this.renderExpeditionBoard();
+                }, 50);
+            }
+
+            renderExpeditionBoard() {
+                const mapCanvas = document.getElementById('worldMapCanvas');
+                const mCtx = mapCanvas.getContext('2d');
+                mapCanvas.width = mapCanvas.parentElement.clientWidth;
+                mapCanvas.height = mapCanvas.parentElement.clientHeight;
+
+                const width = mapCanvas.width;
+                const height = mapCanvas.height;
+
+                // Expedition Wooden Board Texture
+                mCtx.fillStyle = '#1a2e05';
+                mCtx.fillRect(0, 0, width, height);
+
+                // Border Trim
+                mCtx.strokeStyle = '#a16207';
+                mCtx.lineWidth = 12;
+                mCtx.strokeRect(6, 6, width - 12, height - 12);
+
+                // Draw connecting route paths
+                const hub = ISLANDS_DATA.hub;
+                const hubX = hub.mapX * width;
+                const hubY = hub.mapY * height;
+
+                mCtx.strokeStyle = '#a3e635';
+                mCtx.lineWidth = 3;
+                mCtx.setLineDash([8, 8]);
+
+                Object.values(ISLANDS_DATA).forEach(isl => {
+                    if (isl.id === 'hub') return;
+                    const ix = isl.mapX * width;
+                    const iy = isl.mapY * height;
+
+                    mCtx.beginPath();
+                    mCtx.moveTo(hubX, hubY);
+                    mCtx.lineTo(ix, iy);
+                    mCtx.stroke();
+                });
+                mCtx.setLineDash([]);
+
+                // Draw Islands
+                Object.values(ISLANDS_DATA).forEach(isl => {
+                    const ix = isl.mapX * width;
+                    const iy = isl.mapY * height;
+                    const radius = isl.isHub ? 42 : 32;
+
+                    mCtx.fillStyle = isl.color;
+                    mCtx.beginPath();
+                    mCtx.arc(ix, iy, radius, 0, Math.PI * 2);
+                    mCtx.fill();
+
+                    mCtx.strokeStyle = '#422006';
+                    mCtx.lineWidth = 4;
+                    mCtx.stroke();
+
+                    const isCompleted = this.completedIslands.has(isl.id);
+                    mCtx.fillStyle = '#1a2e05';
+                    mCtx.font = '18px "Pixelify Sans"';
+                    mCtx.textAlign = 'center';
+                    mCtx.fillText(isCompleted ? '⭐' : '⚪', ix, iy + 6);
+
+                    mCtx.fillStyle = '#fefce8';
+                    mCtx.font = 'bold 12px "Pixelify Sans"';
+                    mCtx.fillText(isl.name, ix, iy + radius + 16);
+                });
+
+                mapCanvas.onclick = (e) => {
+                    const rect = mapCanvas.getBoundingClientRect();
+                    const mx = e.clientX - rect.left;
+                    const my = e.clientY - rect.top;
+
+                    Object.values(ISLANDS_DATA).forEach(isl => {
+                        const ix = isl.mapX * width;
+                        const iy = isl.mapY * height;
+                        const radius = isl.isHub ? 42 : 32;
+
+                        if (Math.hypot(mx - ix, my - iy) <= radius) {
+                            this.loadIsland(isl.id);
+                            this.closeModals();
+                        }
+                    });
+                };
+
+                mapCanvas.onmousemove = (e) => {
+                    const rect = mapCanvas.getBoundingClientRect();
+                    const mx = e.clientX - rect.left;
+                    const my = e.clientY - rect.top;
+
+                    let hovered = null;
+                    Object.values(ISLANDS_DATA).forEach(isl => {
+                        const ix = isl.mapX * width;
+                        const iy = isl.mapY * height;
+                        const radius = isl.isHub ? 42 : 32;
+
+                        if (Math.hypot(mx - ix, my - iy) <= radius) {
+                            hovered = isl;
+                        }
+                    });
+
+                    const tooltip = document.getElementById('map-tooltip');
+                    if (hovered) {
+                        document.getElementById('tooltip-name').innerText = hovered.name;
+                        document.getElementById('tooltip-desc').innerText = hovered.desc;
+                        document.getElementById('tooltip-star').innerText = this.completedIslands.has(hovered.id) ? '⭐ Completed' : '⚪ Pending';
+                        tooltip.classList.remove('hidden');
+                    } else {
+                        tooltip.classList.add('hidden');
+                    }
+                };
+            }
+
+            initCustomizerUI() {
+                const gBox = document.getElementById('gender-options');
+                gBox.innerHTML = '';
+                GENDERS.forEach(g => {
+                    const b = document.createElement('button');
+                    b.className = `px-2 py-1 border rounded text-xs ${this.avatar.gender === g.id ? 'bg-clay text-parchment border-limeglow' : 'bg-parchment text-fern border-bark'}`;
+                    b.innerText = g.label;
+                    b.onclick = () => { this.avatar.gender = g.id; this.initCustomizerUI(); this.renderCustomizerPreview(); };
+                    gBox.appendChild(b);
+                });
+
+                const skinBox = document.getElementById('skin-options');
+                skinBox.innerHTML = '';
+                SKIN_TONES.forEach((s, idx) => {
+                    const b = document.createElement('button');
+                    b.className = 'w-6 h-6 rounded-full border-2 border-bark';
+                    b.style.backgroundColor = s;
+                    b.onclick = () => { this.avatar.skin = idx; this.renderCustomizerPreview(); };
+                    skinBox.appendChild(b);
+                });
+
+                const hairSelect = document.getElementById('hair-style-select');
+                hairSelect.innerHTML = '';
+                HAIR_STYLES.forEach(h => {
+                    const opt = document.createElement('option');
+                    opt.value = h.id;
+                    opt.innerText = h.name;
+                    hairSelect.appendChild(opt);
+                });
+
+                const hairColorBox = document.getElementById('hair-color-options');
+                hairColorBox.innerHTML = '';
+                HAIR_COLORS.forEach((hc, idx) => {
+                    const b = document.createElement('button');
+                    b.className = 'w-6 h-6 rounded-full border-2 border-bark';
+                    b.style.backgroundColor = hc;
+                    b.onclick = () => { this.avatar.hairColor = idx; this.renderCustomizerPreview(); };
+                    hairColorBox.appendChild(b);
+                });
+
+                const outfitSelect = document.getElementById('outfit-style-select');
+                outfitSelect.innerHTML = '';
+                OUTFITS.forEach((o, idx) => {
+                    const opt = document.createElement('option');
+                    opt.value = idx;
+                    opt.innerText = o.name;
+                    outfitSelect.appendChild(opt);
+                });
+
+                const accSelect = document.getElementById('accessory-select');
+                accSelect.innerHTML = '';
+                ACCESSORIES.forEach(a => {
+                    const opt = document.createElement('option');
+                    opt.value = a.id;
+                    opt.innerText = a.name;
+                    accSelect.appendChild(opt);
+                });
+            }
+
+            openCustomizer() {
+                this.closeModals();
+                this.renderCustomizerPreview();
+                document.getElementById('modal-customizer').classList.remove('hidden');
+            }
+
+            updateAvatarFromUI() {
+                this.avatar.hairStyle = document.getElementById('hair-style-select').value;
+                this.avatar.outfit = parseInt(document.getElementById('outfit-style-select').value);
+                this.avatar.accessory = document.getElementById('accessory-select').value;
+                this.renderCustomizerPreview();
+            }
+
+            renderCustomizerPreview() {
+                const prevCanvas = document.getElementById('customizerCanvas');
+                const pCtx = prevCanvas.getContext('2d');
+                pCtx.clearRect(0, 0, 128, 128);
+                pCtx.save();
+                pCtx.scale(4, 4);
+                this.drawPixelCharacter(pCtx, 0, 0, this.avatar, 32);
+                pCtx.restore();
+            }
+
+            openLibrary(station) {
+                this.closeModals();
+                document.getElementById('library-title').innerText = `📖 ${station.title}`;
+                document.getElementById('library-content').innerHTML = station.info || '<p>Station research records loaded.</p>';
+                document.getElementById('modal-library').classList.remove('hidden');
+            }
+
+            openGameRoom() {
+                this.closeModals();
+                const data = ISLANDS_DATA[this.currentIsland];
+                document.getElementById('gameroom-title').innerText = `${data.name.toUpperCase()} WHITEBOARD CHALLENGE`;
+                
+                const body = document.getElementById('gameroom-body');
+                body.innerHTML = '';
+
+                switch(this.currentIsland) {
+                    case 'microbial':
+                        this.initFermentationGame(body);
+                        break;
+                    case 'agricultural':
+                        this.initDNASequenceGame(body);
+                        break;
+                    case 'animal':
+                        this.initPunnettSquareGame(body);
+                        break;
+                    case 'forensic':
+                        this.initGelElectrophoresisGame(body);
+                        break;
+                    case 'bioremediation':
+                        this.initOilSpillGame(body);
+                        break;
+                    case 'aquatic':
+                        this.initHydrometerGame(body);
+                        break;
+                    case 'medical':
+                        this.initCRISPRShooterGame(body);
+                        break;
+                    case 'regulatory':
+                        this.initRegulatoryGame(body);
+                        break;
+                    case 'college':
+                        this.initTuitionCalculator(body);
+                        break;
+                    default:
+                        this.initDNASequenceGame(body);
+                        break;
+                }
+
+                document.getElementById('modal-gameroom').classList.remove('hidden');
+            }
+
+            /* --- MINI-GAME LOGIC --- */
+            initFermentationGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">Fermentation Yield Dial</h3>
+                        <p class="text-xs text-parchment">Set pH (Target 7.2) and Temp (Target 37°C) to 100% yield!</p>
+                        <div class="bg-deepleaf p-4 rounded border-2 border-sprout space-y-3">
+                            <div>
+                                <label class="block text-xs text-sand mb-1">pH Level: <span id="ph-val" class="text-limeglow font-bold">6.0</span></label>
+                                <input type="range" id="ph-slider" min="4.0" max="10.0" step="0.1" value="6.0" class="w-full" oninput="game.updateFermentation()">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-sand mb-1">Temperature: <span id="temp-val" class="text-limeglow font-bold">25</span>°C</label>
+                                <input type="range" id="temp-slider" min="10" max="60" value="25" class="w-full" oninput="game.updateFermentation()">
+                            </div>
+                        </div>
+                        <button onclick="game.finishMiniGame('microbial')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">SUBMIT DATA</button>
+                    </div>
+                `;
+            }
+
+            updateFermentation() {
+                document.getElementById('ph-val').innerText = parseFloat(document.getElementById('ph-slider').value).toFixed(1);
+                document.getElementById('temp-val').innerText = document.getElementById('temp-slider').value;
+            }
+
+            initDNASequenceGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">CRISPR Gene Matcher</h3>
+                        <p class="text-xs text-parchment">Target Sequence: A - T - C - G</p>
+                        <button onclick="game.finishMiniGame('agricultural')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">EXECUTE GENE MATCH</button>
+                    </div>
+                `;
+            }
+
+            initPunnettSquareGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">Punnett Ratio Challenge</h3>
+                        <button onclick="game.finishMiniGame('animal')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">SELECT 3 : 1 RATIO</button>
+                    </div>
+                `;
+            }
+
+            initGelElectrophoresisGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">Electrophoresis Alignment</h3>
+                        <button onclick="game.finishMiniGame('forensic')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">MATCH SUSPECT DNA</button>
+                    </div>
+                `;
+            }
+
+            initOilSpillGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">Hydrocarbon Microbe Sprayer</h3>
+                        <button onclick="game.finishMiniGame('bioremediation')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">SPRAY OIL SPILL</button>
+                    </div>
+                `;
+            }
+
+            initHydrometerGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">Salinity Hydrometer</h3>
+                        <button onclick="game.finishMiniGame('aquatic')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">BALANCE SALINITY</button>
+                    </div>
+                `;
+            }
+
+            initCRISPRShooterGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">CRISPR Target Cleaver</h3>
+                        <button onclick="game.finishMiniGame('medical')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">CLEAVE TARGET</button>
+                    </div>
+                `;
+            }
+
+            initRegulatoryGame(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">FDA Compliance Sorter</h3>
+                        <button onclick="game.finishMiniGame('regulatory')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">SUBMIT COMPLIANCE</button>
+                    </div>
+                `;
+            }
+
+            initTuitionCalculator(container) {
+                container.innerHTML = `
+                    <div class="text-center w-full max-w-md space-y-4">
+                        <h3 class="text-base font-bold text-limeglow pixel-font">NJ Credit Savings Calculator</h3>
+                        <button onclick="game.finishMiniGame('college')" class="pixel-btn pixel-btn-moss px-6 py-2 rounded text-xs font-bold">CALCULATE SAVINGS</button>
+                    </div>
+                `;
+            }
+
+            finishMiniGame(islandId) {
+                this.closeModals();
+                this.markIslandCompleted(islandId);
+            }
+        }
+
+        let game = null;
+        window.addEventListener('load', () => {
+            game = new GameEngine();
+        });
+    </script>
+</body>
+</html>
